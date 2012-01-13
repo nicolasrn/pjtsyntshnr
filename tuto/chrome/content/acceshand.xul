@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css" ?>
+<?xml-stylesheet href="chrome://browser/skin/browser.css" type="text/css" ?>
+<!DOCTYPE page SYSTEM "chrome://acceshand/locale/acceshand.dtd">
+
+<page 	id="mainPage" title="&emptysidebar.title;"
+		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
+		
+	<script type="application/x-javascript;version=1.8" src="chrome://acceshand/content/acceshand.js"/>
+		
+	<vbox flex="1">
+        <vbox id="mainBox">
+			<textbox multiline="true" id="debug"/>
+			<hbox id="boxClavierPrincipal">
+			
+			</hbox>
+			
+			<hbox id="boxClavierPage">
+			
+			</hbox>
+			
+			<hbox id="boxClavierOnglet">
+			
+			</hbox>
+			
+			<hbox id="boxClavierNumerique">
+			
+			</hbox>
+			
+			<hbox id="boxClavierAlpha">
+			
+			</hbox>
+			
+			<hbox id="boxClavierFavori">
+			
+			</hbox>
+    	</vbox>
+    	
+    	<script type="application/x-javascript;version=1.8">
+    		function onKeypress(event)
+    		{
+    			alert("changement : " + event);
+    			document.getElementById('debug').value = Command.utils.getValuesOfKeys(event).join('\n');
+    		}
+    		
+    		(function() {
+    			document.getElementById('debug').addEventListener('keypress', onKeypress, true);
+    			
+	    		clavierNumerique.nbRow = 4;
+	   		 	clavierNumerique.nbCol = 3;
+	   		 	
+	   		 	clavierAlpha.nbRow = 6;
+	   		 	clavierAlpha.nbCol = 5;
+	   		 	
+	   		 	clavierPrincipal.createKeyBoard('boxClavierPrincipal');
+				
+				clavierPage.createKeyBoard('boxClavierPage');
+				
+				clavierOnglet.createKeyBoard('boxClavierOnglet');
+				
+	   		 	clavierNumerique.createKeyBoard('boxClavierNumerique');
+	   		 	
+	   		 	clavierAlpha.createKeyBoard('boxClavierAlpha');
+				
+				clavierFavori.createKeyBoard('boxClavierFavori');
+				
+				clavierCourant.display();
+				clavierCourant.start();
+				
+				let win = document.getElementById('mainPage');
+				win.addEventListener('click', Command.buttonPressed, true);
+			})();
+   		 </script>
+	</vbox>
+</page>
