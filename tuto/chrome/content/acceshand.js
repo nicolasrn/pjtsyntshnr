@@ -148,9 +148,9 @@ Command = {
 	navigation: function()
 	{
 		urll = this.utils.getMainWindow().liberator.modules.buffer.URL;
-		let map = this.utils.getMainWindow().liberator.modules.mappings["get"](1, "f", urll);
-		map.execute(null, null);
-		//this.utils.getMainWindow().liberator.modules.hints.show('o', undefined, undefined, true, true);
+		//let map = this.utils.getMainWindow().liberator.modules.mappings["get"](1, "f", urll);
+		//map.execute(null, null);
+		this.utils.getMainWindow().liberator.modules.hints.show('o', undefined, undefined, true, true);
 		this.numerique();
 		//timer.urlPagePred = this.utils.getMainWindow().getBrowser().selectedBrowser.contentWindow.location.href;
 		//if (this.timerNavigation == false)

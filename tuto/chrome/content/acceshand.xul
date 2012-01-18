@@ -11,7 +11,7 @@
 	
 	<vbox flex="1">
         <vbox id="mainBox">
-			<textbox multiline="true" id="debug" height="300px" hidden="true"/>
+			<textbox multiline="true" id="debug" height="300px" hidden="false"/>
 			<hbox id="boxClavierPrincipal">
 			
 			</hbox>
