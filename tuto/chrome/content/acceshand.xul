@@ -1,16 +1,17 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css" ?>
 <?xml-stylesheet href="chrome://browser/skin/browser.css" type="text/css" ?>
+<?xml-stylesheet href="chrome://acceshand/locale/tuto.css" type="text/css" ?>
 <!DOCTYPE page SYSTEM "chrome://acceshand/locale/acceshand.dtd">
 
 <page 	id="mainPage" title="&emptysidebar.title;"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
 		
 	<script type="application/x-javascript;version=1.8" src="chrome://acceshand/content/acceshand.js"/>
-		
+	
 	<vbox flex="1">
         <vbox id="mainBox">
-			<textbox multiline="true" id="debug"/>
+			<textbox multiline="true" id="debug" height="300px" hidden="true"/>
 			<hbox id="boxClavierPrincipal">
 			
 			</hbox>
@@ -34,26 +35,24 @@
 			<hbox id="boxClavierFavori">
 			
 			</hbox>
+			
+			<hbox id="boxDebug">
+			
+			</hbox>
     	</vbox>
     	
     	<script type="application/x-javascript;version=1.8">
-    		function onKeypress(event)
-    		{
-    			alert("changement : " + event);
-    			document.getElementById('debug').value = Command.utils.getValuesOfKeys(event).join('\n');
-    		}
+    		//function onKeypress(event)
+    		//{
+    		//	alert("changement : " + event);
+    		//	document.getElementById('debug').value = Command.utils.getValuesOfKeys(event).join('\n');
+    		//}
     		
     		(function() {
-    			document.getElementById('debug').addEventListener('keypress', onKeypress, true);
+    			//document.getElementById('debug').addEventListener('keypress', onKeypress, true);
     			
-	    		clavierNumerique.nbRow = 4;
-	   		 	clavierNumerique.nbCol = 3;
-	   		 	
-	   		 	clavierAlpha.nbRow = 6;
-	   		 	clavierAlpha.nbCol = 5;
-	   		 	
 	   		 	clavierPrincipal.createKeyBoard('boxClavierPrincipal');
-				
+
 				clavierPage.createKeyBoard('boxClavierPage');
 				
 				clavierOnglet.createKeyBoard('boxClavierOnglet');
@@ -64,11 +63,15 @@
 				
 				clavierFavori.createKeyBoard('boxClavierFavori');
 				
+				clavierTest.createKeyBoard('boxDebug');
+				
+				//clavierCourant = clavierFavori;
 				clavierCourant.display();
-				clavierCourant.start();
+				clavierCourant.start(true);
 				
 				let win = document.getElementById('mainPage');
-				win.addEventListener('click', Command.buttonPressed, true);
+				//win.addEventListener('keypress', Command.buttonPressed, false);
+				win.addEventListener('click', Command.buttonPressed, false);
 			})();
    		 </script>
 	</vbox>

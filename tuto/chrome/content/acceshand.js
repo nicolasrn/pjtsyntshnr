@@ -78,20 +78,31 @@ timer = new Timer();
 	event.dispatchEvent(event);
 }*/
 
+function debug(str)
+{
+	document.getElementById('debug').value = str + "\n" + document.getElementById('debug').value;
+}
+
 /**
  *Classe ou tableau associatif regroupant les différentes commandes boutons
  */
 Command = {
 	utils: mutils,
 	
+	tailleBouton: 50,
+	
 	timerNavigation: false,
 	
-	//appelé lors de la détection d'un clic
-	buttonPressed: function (event) {
-		clavierCourant.stop();
-		//alert("selectionné : " + clavierCourant.getSelectedButton());
-		clavierCourant.execute();
-		clavierCourant.start();
+	buttonPressed: function (event) 
+	{
+		let retStop = clavierCourant.stop();
+		setTimeout(function() {
+			let retExec = clavierCourant.execute();
+			debug("dans le clique : stop = " + retStop);
+			debug("dans le clique : exec = " + retExec);
+			//alert("execute ? " + ret);
+			clavierCourant.start(retStop);
+		}, 1000); //temporisation necessaire apparement pour le click*/
 	},
 	
 	//fonction clavierPrincipal
@@ -137,16 +148,16 @@ Command = {
 	navigation: function()
 	{
 		urll = this.utils.getMainWindow().liberator.modules.buffer.URL;
-		//let map = this.utils.getMainWindow().liberator.modules.mappings["get"](1, "f", urll); show('o', undefined, undefined)
-		//map.execute(null, null); 
-		this.utils.getMainWindow().liberator.modules.hints.show('o', undefined, undefined, true, true);
+		let map = this.utils.getMainWindow().liberator.modules.mappings["get"](1, "f", urll);
+		map.execute(null, null);
+		//this.utils.getMainWindow().liberator.modules.hints.show('o', undefined, undefined, true, true);
 		this.numerique();
-		timer.urlPagePred = this.utils.getMainWindow().getBrowser().selectedBrowser.contentWindow.location.href;
-		if (this.timerNavigation == false)
-		{
-			this.timerNavigation = true;
-			timer.start();
-		}
+		//timer.urlPagePred = this.utils.getMainWindow().getBrowser().selectedBrowser.contentWindow.location.href;
+		//if (this.timerNavigation == false)
+		//{
+		//	this.timerNavigation = true;
+		//	timer.start();
+		//}
 	},
 	
 	retour: function()
@@ -188,42 +199,31 @@ Command = {
 	//fonction ClavierAlpha
 	caractere: function(char)
 	{
-	    let elem = this.utils.getMainWindow().liberator.modules.buffer.lastInputField;
-	    elem.value += char;
-   	    elem.focus();
-   	    /*let evt = document.createEvent("Events");
-	    evt.initEvent("keydown", true, true);
-	    
-	    let elem = this.utils.getMainWindow().liberator.modules.buffer.lastInputField;
-	    elem.addEventListener("keydown", fctEcrire, true);
-		
-	    evt.view = elem;
-	    evt.altKey = false;
-	    evt.ctrlKey = false;
-	    evt.shiftKey = false;
-	    evt.metaKey = false;
-	    evt.keyCode = 0;
-	    evt.charCode = char.charCodeAt(0);*/
-	    //alert(char.charCodeAt(0));
-	    /*alert(code + "\n" + String.fromCharCode(code) + "\n" + code.charCodeAt(0));
-	    let elem = this.utils.getMainWindow().liberator.modules.buffer.lastInputField;
-	    elem.value += String.fromCharCode(code);
-   	    elem.focus();*/
-   	    
-		//elem.dispatchEvent(evt);  
+		let target = this.utils.getMainWindow().liberator.modules.buffer.lastInputField;
+		target.focus();
+		let key = target.ownerDocument.createEvent("KeyEvents");
+		key.initKeyEvent("keypress", true, true, null, false, false, false, false, 0, char.charCodeAt(0));
+		//key.initKeyEvent("keypress", true, true, null, false, false, false, false, /*ici pour les caracteres speciaux*/, 0);
+		target.dispatchEvent(key);
+		key.stopPropagation;
 	},
 	
 	//fonction clavierPage
 	//monter dans la page
 	up: function()
 	{
-		this.utils.getMainWindow().liberator.modules.buffer.scrollLines(-5);
+		//this.utils.getMainWindow().liberator.modules.buffer.scrollLines(-5);
+		//document.getElementById('debug').value=this.utils.getKeys(this.utils.getMainWindow().getBrowser().selectedBrowser.contentWindow).join('\n');
+		this.utils.getMainWindow().getBrowser().selectedBrowser.contentWindow.scrollByPages(-1);
+		//alert("la");
 	},
 	
 	//descendre dans la page
 	down: function()
 	{
-		this.utils.getMainWindow().liberator.modules.buffer.scrollLines(5);
+		//this.utils.getMainWindow().liberator.modules.buffer.scrollLines(5);
+		this.utils.getMainWindow().getBrowser().selectedBrowser.contentWindow.scrollByPages(1);
+		//alert("la");
 	},
 	
 	left: function()
@@ -260,13 +260,114 @@ Command = {
 		this.utils.getMainWindow().gBrowser.addTab("http://www.google.com/");  
 		//gBrowser.selectedTab = gBrowser.addTab("http://www.google.com/"); 
 	},
+
+	naviguer: function(url)
+	{
+		//accede a l'url entree en parametre	
+		this.utils.getMainWindow().gBrowser.addTab(url); 
+	},
 	
+	recupFavoris: function()
+	{
+		let bookmarks = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"].getService(Components.interfaces.nsINavBookmarksService);
+		let history = Components.classes["@mozilla.org/browser/nav-history-service;1"].getService(Components.interfaces.nsINavHistoryService);
+		
+		let query = history.getNewQuery();
+		
+		//Specify folders to be searched
+		let folders = [bookmarks.toolbarFolder, bookmarks.bookmarksMenuFolder, bookmarks.unfiledBookmarksFolder];
+		query.setFolders(folders, folders.length);
+		
+		//Specify terms to search for, matches against title, URL and tags
+		//query.searchTerms = "firefox";
+		
+		let options = history.getNewQueryOptions();
+		options.queryType = options.QUERY_TYPE_BOOKMARKS;
+		
+		let result = history.executeQuery(query, options);
+		
+		//The root property of a query result is an object representing the folder you specified above.
+		let resultContainerNode = result.root;
+		
+		//Open the folder, and iterate over its contents.
+		resultContainerNode.containerOpen = true;
+		
+		let nom = new Array();
+		let action = new Array();
+		for (let i=0; i < resultContainerNode.childCount; ++i) 
+		{
+			let childNode = resultContainerNode.getChild(i);
+			
+			// Accessing properties of matching bookmarks
+			let title = childNode.title;
+			let uri = childNode.uri;
+			
+			action.push("Command.naviguer(\""+uri+"\")");
+			if (title == "")
+				title = uri.substr(10, 100);
+			
+			title = title.length > Command.tailleBouton ? title.substr(0, Command.tailleBouton - 3) + "…" : title;
+			nom.push(title);
+		}
+		return [nom, action];
+	},
+
 	deleteFavori: function()
 	{
+		/*
+		 * With the bookmarks service:
+		 * removeItem(aItemId) - Works for all types
+		 * removeFolder(aItemId) - Works for folders and livemarks
+		 * removeFolderChildren(aItemId) - Works for folders and livemarks
+		 */
+		let bmsvc = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"].getService(Components.interfaces.nsINavBookmarksService);
+		let ios = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
+		let uri = ios.newURI(this.utils.getMainWindow().liberator.modules.buffer.URL, null, null);
+		let bookmarksArray = bmsvc.getBookmarkIdsForURI(uri, {});
+		
+		for(let i = 0; i < bookmarksArray.length; i++)
+			bmsvc.removeItem(bookmarksArray[i]);
 	},
 	
 	addFavori: function()
 	{
+		let bmsvc = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"].getService(Components.interfaces.nsINavBookmarksService);
+		let ios = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
+		let uri = ios.newURI(this.utils.getMainWindow().liberator.modules.buffer.URL, null, null);
+		let title = this.utils.getMainWindow().window.document.title.replace("- Vimperator", "").replace("Vimperator", "");
+		
+		title = title.length > Command.tailleBouton ? title.substr(0, Command.tailleBouton - 3) + "…" : title;
+		let newBkmkId = bmsvc.insertBookmark(bmsvc.bookmarksMenuFolder, uri, bmsvc.DEFAULT_INDEX, title);
+		//uri = getBookmarkURI(id)
+		//alert("la");
+		//let bookmarksArray = bmsvc.getBookmarkIdsForURI(uri, {});
+		//alert("ici");
+		//alert(bookmarksArray);
+		//alert("ok");
+		
+		/*
+		 * sofiane
+		 */
+		/*url = this.utils.getMainWindow().liberator.modules.buffer.URL;
+		var indiceDepart = url.indexOf('.')+1;
+		var nomPage = url.substring(indiceDepart);		
+		var indiceFin = nomPage.indexOf('.'); 
+		nomPage = nomPage.substring(0,indiceFin);
+		//ecriture de l'information dans le fichier texte adequate de la forme nom;url sur chaque ligne
+		var file = Components.classes["@mozilla.org/file/directory_service;1"]
+                    .getService(Components.interfaces.nsIProperties)
+                    .get("TmpD", Components.interfaces.nsIFile);
+		file.append("favoris.txt");
+		if (!file.exists())
+			file.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0664);		 
+		// file est un nsIFile, data est une chaîne de caractères
+		var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
+								.createInstance(Components.interfaces.nsIFileOutputStream);
+		// utiliser 0x02 | 0x10 pour ouvrir le fichier en ajout.
+		foStream.init(file,0x02|0x10, 0664, 0); // écrire, créer, tronquer
+		foStream.write(nomPage+";", nomPage.length+1);		
+		foStream.write(url, url.length);
+		foStream.close();*/
 	}
 }
 
@@ -276,16 +377,18 @@ Command = {
  *@param actionKeys : liste des actions associées au bouton sous forme tableau de chaine de caractère attention actionKeys[i] est associé à keys[i]
  *@param nomVar : nom de la variable utilisé pour faire la récursion avec setTimeOut
  */
-function ClavierVirtuel(keys, actionKeys)
+function ClavierVirtuel(keys, actionKeys, nc, nr)
 {
 	//liste des touches sous formes de tableaux de caractère ou chaine
 	this.keyTab = keys;
 	//liste des actions associées aux boutons 
 	this.actKeys = actionKeys;
 	//tableau qui contient les boutons en tant qu'objet XUL
-	this.buttonTab = new Array();
+	this.buttonTab = null;// = new Array();
 	//pour le balayage
-	this.iterateur = 0;
+	this.iterateur = 0; //1 dimension
+	this.iterateurX = 0;//2 dimensions
+	this.iterateurY = 0;//2 dimensions
 	this.continuer = true;
 	//pour l'appel récursif
 	//this.varName = nomVar;
@@ -293,8 +396,14 @@ function ClavierVirtuel(keys, actionKeys)
 	this.selectedButton = 0;
 	
 	//pour l'affichage
-	this.nbRow = 1;
-	this.nbCol = this.keyTab.length;
+	if (!nr)	this.nbRow = this.keyTab.length; 
+	else 		this.nbRow = nr;
+	
+	if (!nc) 	this.nbCol = 1; 
+	else		this.nbCol = nc;
+	
+	//alert(this.keyTab + "\n" + this.nbRow + " " + this.nbCol);
+	
 	this.timer = null;
 	
 	this.created = false;
@@ -310,12 +419,21 @@ function ClavierVirtuel(keys, actionKeys)
 		return item;
 	}
 	
+	this.buttonTab = new Array(this.nbCol);
+	for(let i = 0; i < this.nbCol; i++)
+		this.buttonTab[i] = new Array(this.nbRow);
 	//initialisation du tableau de bouton
-	for (let i = 0; i < this.keyTab.length; i++)
+	for(let k = 0; k < this.nbCol; k++)
 	{
-		let boutton = this.addKey("" + this.keyTab[i], (Array.isArray(this.actKeys) ? this.actKeys[i] : this.actKeys));
-		this.buttonTab.push(boutton);
+		for(let j = 0; j < this.nbRow; j++)
+		{
+			let boutton = this.addKey("" + this.keyTab[this.iterateur], (Array.isArray(this.actKeys) ? this.actKeys[this.iterateur] : this.actKeys));
+			this.buttonTab[k][j] = boutton;
+			this.iterateur++;
+		}
 	}
+	this.iterateur = 0;
+	//alert(this.buttonTab.join("\n"));
 	
 	//rajoute un hbox avec un id aId et un booleen indiquant la visibilité : visible = true
 	this.addHBox = function(aId, visible)
@@ -341,33 +459,71 @@ function ClavierVirtuel(keys, actionKeys)
 	//fonctionne comme un singleton
 	this.createKeyBoard = function(idParent)
 	{
-		if (this.created == false)
+		if (this.created == false)//si rien n'a encore ete fait
 		{
-			let box = document.getElementById(idParent);
-			this.cntPrincipal = this.addVBox("filsDe"+idParent, false);
-			let pos = 0;
-			//alert("this.nbRow : " + this.nbRow + "\nthis.nbCol : " + this.nbCol);
-			for (let i = 0; i < this.nbRow && pos < this.buttonTab.length - 1; i++)
+			this.iterateur = 0;//variable de travail
+			let box = document.getElementById(idParent); //contenaire parent
+			this.cntPrincipal = this.addVBox("filsDe"+idParent, false); //contenaire principale 
+			let ok = true; //permet de verifier si on a encore un bouton dispo
+			
+			//alert("this.nbCol : " + this.nbCol + "\nthis.nbRow : " + this.nbRow);
+			for (let i = 0; !(i >= this.nbCol || ok == false); i++) //tant que i < this.nbCol && ok == false
 			{
-				let line = this.addHBox("c"+i, true);
-				for(let j = 0; j < this.nbCol && pos < this.buttonTab.length - 1; j++)
+				let line = this.addHBox("c"+i, true); //pour mise en forme
+				for(let j = 0; !(j >= this.nbRow || ok == false); j++) // sur chaque ligne
 				{
-					pos = i * (this.nbRow-1) + j;
-					//alert(i + " * " + (this.nbRow-1) + " + " + j + " = " + pos);
-					line.appendChild(this.buttonTab[pos]);
+					//alert(this.actKeys[this.iterateur]);
+					if (!this.actKeys[this.iterateur]) //condition qui permet de verifier si un bouton existe encore
+					{
+					//	alert("erreur");
+						ok = false; //dans ce cas non pour indiquer qu'on va sortir du let i …
+						break; //on sort de la boucle courante et donc on remonte dans le let i ...
+					}
+					//alert("insertion en (" + i + ", " + j + ")\niterateur = " + this.iterateur + "\nbouton : " + this.keyTab[this.iterateur]);
+					line.appendChild(this.buttonTab[i][j]);//ajout dans la ligne
+					this.iterateur++; //on increment 
 				}
-				this.cntPrincipal.appendChild(line);
+				this.cntPrincipal.appendChild(line); //on rajoute la ligne au contenaire principale
 			}
-			box.appendChild(this.cntPrincipal);
-			this.created = true;
+			box.appendChild(this.cntPrincipal);//le containaire principale et rajoute au parent
+			this.created = true; //la creation est termine
+			this.iterateur = 0; // reinitialisation de la variable de travail
 		}
 	}
 	
 	//execute l'action associé au bouton i
 	this.execute = function()
 	{
-		//il suffit de simuler un clique
-		this.buttonTab[this.selectedButton].click();
+		if (this.continuer ==  false)
+		{
+			/*if (this.nbCol == 1)
+			{
+				this.iterateur = 1;
+				this.iterateurY++;
+			}
+			alert("this.buttonTab[" + this.iterateurY + "- 1][" + this.iterateurX + "- 1]");*/
+			
+			//debug("Execution : iterateur = " + this.iterateur);
+			//il suffit de simuler un clique
+			if (this.iterateur == 1) // si j'ai fait les 2 iterations
+			{
+			//	debug("Execution dans le if : iterateur = " + this.iterateur);
+			//	if (this.buttonTab[this.selectedButton]) //si le bouton existe
+			//	{
+			//		//alert("boutton selectionné" + this.selectedButton);
+					//alert("avant exec");
+					this.buttonTab[this.iterateurY - 1][this.iterateurX - 1].click(); //action du bouton
+					//alert("apres exec");
+					this.iterateur = 0;
+			//		debug("Execution dans le if if apres execution : iterateur = " + this.iterateur);
+					return true; //actionne
+			//	}
+			}
+			this.iterateur = 1;
+			//debug("Execution : nouvel iterateur = " + this.iterateur);
+			return false;
+		}
+		return false;
 	}
 	
 	//affiche le clavier mis en forme avec hbox et vbox selon le nbRow et nbCol
@@ -399,48 +555,89 @@ function ClavierVirtuel(keys, actionKeys)
 		this.continuer = false;
 		clearTimeout(this.timer);
 		//alert("1");
-		this.selectedButton = this.iterateur - 1; //comme on incremente juste avant de l'appel récursif
+		//this.selectedButton = (this.iterateurX - 1) * this.nbCol + this.iterateurY - 1;//this.iterateur - 1; //comme on incremente juste avant de l'appel récursif
+		//alert(this.selectedButton);
 		//alert("2");
-		for(let i = 0; i < this.buttonTab.length; i++)
-			this.buttonTab[i].setAttribute("style", "color:black");
+		//for(let i = 0; i < this.buttonTab.length; i++)
+		//	this.buttonTab[i].setAttribute("style", "color:black");
 		//alert("3");
-		this.iterateur = 0;
-		//alert("4");
+
+		if (this.nbCol == 1)
+		{
+			this.iterateur = 1;
+			this.iterateurY++;
+		}
+		return this.iterateur == 1 ? true : false;
 	}
 	
-	this.start = function()
+	this.start = function(val)
 	{
+		if (val)
+		{
+			for(let i = 0; i < this.nbCol; i++)
+				for(let j = 0; j < this.nbRow; j++)
+					this.buttonTab[i][j].setAttribute("style", "color:black");
+			this.iterateur = 0;
+			this.iterateurX = 0;//2 dimensions
+			this.iterateurY = 0;//2 dimensions
+			debug("raz iterateur = " + this.iterateur + " iterateurX = " + this.iterateurX + " iterateurY = " + this.iterateurY);
+		}
+		debug("reprise avec iterateur = " + this.iterateur + " iterateurX = " + this.iterateurX + " iterateurY = " + this.iterateurY);
 		this.continuer = true;
 		this.parcourir(this);
 	}
 	
-	//balayage du clavier
 	this.parcourir = function(self)
 	{
 		if (self.continuer)
 		{
-			//alert("a");
-			//alert("self.iterateur : " + self.iterateur + "\nself.buttonTab.length : " + self.buttonTab.length);
-			self.iterateur = self.iterateur % self.buttonTab.length;
-			//alert("self.iterateur % self.buttonTab.length : " + self.iterateur);
-			//alert("b");
-			if (self.iterateur - 1 >= 0)
+			debug("self.continuer");
+			
+			if (self.iterateur == 0) //on est sur les x colonne
 			{
-			//	alert("c");
-				self.buttonTab[self.iterateur-1].setAttribute("style", "color:black");
+				debug("self.iterateur == 0");
+				
+				debug("raz compteur");
+				if (self.iterateurX > self.nbRow - 1)
+					self.iterateurX = 0;
+				
+				debug("changement precedant");
+				if (self.iterateurX - 1 >= 0) //cas ou un précedant existe
+					for(let i = 0; i < self.nbCol; i++)
+						self.buttonTab[i][self.iterateurX - 1].setAttribute("style", "color:black");
+				else //cas ou le precedant est le dernier elt
+					for(let i = 0; i < self.nbCol; i++)
+						self.buttonTab[i][self.nbRow - 1].setAttribute("style", "color:black");
+					
+				debug("changement courant");
+				for(let i = 0; i < self.nbCol; i++)
+					self.buttonTab[i][self.iterateurX].setAttribute("style", "color:red");
+				
+				self.iterateurX++;
+				debug("incrementation x");
 			}
-			if (self.iterateur == 0)
+			else if (self.iterateur == 1) //on est sur les y ligne
 			{
-			//	alert("d");
-				self.buttonTab[self.buttonTab.length-1].setAttribute("style", "color:black");
+				debug("self.iterateur == 1");
+				
+				debug("raz compteur");
+				if (self.iterateurY > self.nbCol - 1)
+					self.iterateurY = 0;
+				
+				debug("changement precedant");
+				if (self.iterateurY - 1 >= 0) //cas ou un précedant existe
+					self.buttonTab[self.iterateurY - 1][self.iterateurX - 1].setAttribute("style", "color:red");
+				else //cas ou le precedant est le dernier elt
+					self.buttonTab[self.nbCol - 1][self.iterateurX - 1].setAttribute("style", "color:red");
+				
+				debug("changement courant");
+				self.buttonTab[self.iterateurY][self.iterateurX - 1].setAttribute("style", "color:blue");
+				
+				self.iterateurY++;
+				debug("incrementation y");
 			}
-			//alert("e");
-			self.buttonTab[self.iterateur].setAttribute("style", "color:red");
-			//alert("f");
-			self.iterateur = self.iterateur + 1;
-			//alert("g");
-			//this.timer = setTimeout(this.varName+".parcourir()", 1000);
-			clearTimeout(this.timer);
+			
+			clearTimeout(self.timer);
 			self.timer = setTimeout(self.parcourir, 1000, self);
 		}
 	}
@@ -470,11 +667,14 @@ for(let i = 0; i < 10; i++)
 }
 nomClavierNumero.push("retour");
 actionClavierNumero.push("Command.retour()");
-clavierNumerique = new ClavierVirtuel(nomClavierNumero, actionClavierNumero);
+clavierNumerique = new ClavierVirtuel(nomClavierNumero, actionClavierNumero, 3, 4);
 
-nomClavierFavori = new Array("supprimer", "ajouter", "retour");
-actionClavierFavori = new Array("Command.deleteFavori()", "Command.addFavori()", "Command.retour()");
-clavierFavori = new ClavierVirtuel(nomClavierFavori, actionClavierFavori);
+nomClavierFav = new Array('ajouter', 'supprimer', 'retour');
+actionClavierFav = new Array('Command.addFavori()', 'Command.deleteFavori()', 'Command.retour()');
+let tmp = Command.recupFavoris();
+nomClavierFav = nomClavierFav.concat(tmp[0]);
+actionClavierFav = actionClavierFav.concat(tmp[1]);
+clavierFavori = new ClavierVirtuel(nomClavierFav, actionClavierFav, Math.floor(Math.sqrt(nomClavierFav.length)), Math.ceil(Math.sqrt(nomClavierFav.length)));
 
 nomClavierAlpha = new Array();
 actionClavierAlpha = new Array();
@@ -485,12 +685,13 @@ for(let i = 97; i < 97 + 26; i++)
 }
 nomClavierAlpha.push("retour");
 actionClavierAlpha.push("Command.retour()");
-clavierAlpha = new ClavierVirtuel(nomClavierAlpha, actionClavierAlpha);
+clavierAlpha = new ClavierVirtuel(nomClavierAlpha, actionClavierAlpha, 5, 6);
+
+clavierTest = new ClavierVirtuel(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'], [], 5, 3);
 
 clavierCourant = clavierPrincipal;
 
-
-//*
+/*
 function murl()
 {
 	//alert(mainWindow.getBrowser().selectedBrowser.contentWindow.location.href);
