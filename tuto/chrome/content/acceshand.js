@@ -160,6 +160,22 @@ Command = {
 		//}
 	},
 	
+	souris: function()
+	{
+		$.ajax({
+			   type: "GET",
+			   url: "http://10.14.53.49/~Nico/cgi/click",
+			   data: "x=200&y=200",
+			   success: function(msg){
+			     alert( "nickel" );
+			   },
+			   error: function()
+			   {
+				   alert("pepin");
+			   }
+			 });
+	},
+	
 	retour: function()
 	{
 		if (clavierPrec != null && !(clavierCourant == clavierPrincipal))
@@ -646,8 +662,8 @@ function ClavierVirtuel(keys, actionKeys, nc, nr)
 clavierCourant = null;
 clavierPrec = null;
 
-nomClavierPrincipal = new Array(	"onglet", 			"page", 		 "clavier", 			"favoris", 			 "lien", 				"retour");
-actionClavierPrincipal = new Array("Command.onglet()", "Command.page()", "Command.alpha()", "Command.favoris()", "Command.navigation()", "Command.retour()");
+nomClavierPrincipal = new Array(	"onglet", 			"page", 		 "clavier", 			"favoris", 			 "lien", 				"Souris" ,"retour");
+actionClavierPrincipal = new Array("Command.onglet()", "Command.page()", "Command.alpha()", "Command.favoris()", "Command.navigation()", "Command.souris()", "Command.retour()");
 clavierPrincipal = new ClavierVirtuel(nomClavierPrincipal, actionClavierPrincipal);
 
 nomClavierPage = new Array("monter", "descendre", "précédent", "suivant", "retour");

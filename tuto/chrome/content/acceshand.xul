@@ -6,8 +6,9 @@
 
 <page 	id="mainPage" title="&emptysidebar.title;"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
-		
+	
 	<script type="application/x-javascript;version=1.8" src="chrome://acceshand/content/acceshand.js"/>
+	<script type="application/x-javascript;version=1.8" src="chrome://acceshand/content/jquery.js"/>
 	
 	<vbox flex="1">
         <vbox id="mainBox">
