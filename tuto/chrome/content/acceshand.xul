@@ -9,6 +9,7 @@
 	
 	<script type="application/x-javascript;version=1.8" src="chrome://acceshand/content/acceshand.js"/>
 	<script type="application/x-javascript;version=1.8" src="chrome://acceshand/content/jquery.js"/>
+	<script type="application/x-javascript;version=1.8" src="chrome://acceshand/content/joystick.js"/>
 	
 	<vbox flex="1">
         <vbox id="mainBox">
@@ -50,6 +51,7 @@
     		//}
     		
     		(function() {
+    			
     			//document.getElementById('debug').addEventListener('keypress', onKeypress, true);
     			
 	   		 	clavierPrincipal.createKeyBoard('boxClavierPrincipal');
@@ -70,9 +72,28 @@
 				clavierCourant.display();
 				clavierCourant.start(true);
 				
-				let win = document.getElementById('mainPage');
+				//let win = document.getElementById('mainPage');
 				//win.addEventListener('keypress', Command.buttonPressed, false);
-				win.addEventListener('click', Command.buttonPressed, false);
+				//win.addEventListener('click', Command.buttonPressed, false);
+				
+				INTERVAL = 5;
+				act = function()
+				{
+					let a = stick.getA();
+					document.getElementById("debug").value = a;
+					if (a != false)
+						Command.buttonPressed();
+					setTimeout(act, INTERVAL);
+				}
+				
+				init = function()
+				{
+					stick = new Joystick();
+					act();
+				}
+				
+				setTimeout(init, 1000);
+				//setTimeout(act, 50);
 			})();
    		 </script>
 	</vbox>

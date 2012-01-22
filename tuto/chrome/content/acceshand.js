@@ -25,7 +25,35 @@ Utils.prototype.getKeys = function(obj)
 	return keys;
 }
 
+Utils.getMainWindow = function()
+{
+	return window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+                  .getInterface(Components.interfaces.nsIWebNavigation)
+                  .QueryInterface(Components.interfaces.nsIDocShellTreeItem)
+                  .rootTreeItem
+                  .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+                  .getInterface(Components.interfaces.nsIDOMWindow);
+}
+
 Utils.prototype.getValuesOfKeys = function(obj)
+{
+	var keys = [];
+	for(let key in obj){
+		keys.push(key + " : " + obj[key]);
+	}
+	return keys;
+}
+
+Utils.getKeys = function(obj)
+{
+	var keys = [];
+	for(let key in obj){
+		keys.push(key);
+	}
+	return keys;
+}
+
+Utils.getValuesOfKeys = function(obj)
 {
 	var keys = [];
 	for(let key in obj){
@@ -83,6 +111,11 @@ function debug(str)
 	document.getElementById('debug').value = str + "\n" + document.getElementById('debug').value;
 }
 
+function pausecomp(ms) {
+	ms += new Date().getTime();
+	while (new Date() < ms){}
+}
+
 /**
  *Classe ou tableau associatif regroupant les différentes commandes boutons
  */
@@ -93,16 +126,17 @@ Command = {
 	
 	timerNavigation: false,
 	
-	buttonPressed: function (event) 
+	buttonPressed: function () 
 	{
+		pausecomp(1000);
 		let retStop = clavierCourant.stop();
-		setTimeout(function() {
+		//setTimeout(function() {
 			let retExec = clavierCourant.execute();
-			debug("dans le clique : stop = " + retStop);
-			debug("dans le clique : exec = " + retExec);
+			//debug("dans le clique : stop = " + retStop);
+			//debug("dans le clique : exec = " + retExec);
 			//alert("execute ? " + ret);
 			clavierCourant.start(retStop);
-		}, 1000); //temporisation necessaire apparement pour le click*/
+		//}, 1000); //temporisation necessaire apparement pour le click*/
 	},
 	
 	//fonction clavierPrincipal
@@ -164,7 +198,7 @@ Command = {
 	{
 		$.ajax({
 			   type: "GET",
-			   url: "http://10.14.53.49/~Nico/cgi/click",
+			   url: "localhost",
 			   data: "x=200&y=200",
 			   success: function(msg){
 			     alert( "nickel" );
@@ -596,10 +630,11 @@ function ClavierVirtuel(keys, actionKeys, nc, nr)
 			this.iterateur = 0;
 			this.iterateurX = 0;//2 dimensions
 			this.iterateurY = 0;//2 dimensions
-			debug("raz iterateur = " + this.iterateur + " iterateurX = " + this.iterateurX + " iterateurY = " + this.iterateurY);
+			//debug("raz iterateur = " + this.iterateur + " iterateurX = " + this.iterateurX + " iterateurY = " + this.iterateurY);
 		}
-		debug("reprise avec iterateur = " + this.iterateur + " iterateurX = " + this.iterateurX + " iterateurY = " + this.iterateurY);
+		//debug("reprise avec iterateur = " + this.iterateur + " iterateurX = " + this.iterateurX + " iterateurY = " + this.iterateurY);
 		this.continuer = true;
+		//alert("av parcours");
 		this.parcourir(this);
 	}
 	
@@ -607,17 +642,17 @@ function ClavierVirtuel(keys, actionKeys, nc, nr)
 	{
 		if (self.continuer)
 		{
-			debug("self.continuer");
+			//debug("self.continuer");
 			
 			if (self.iterateur == 0) //on est sur les x colonne
 			{
-				debug("self.iterateur == 0");
+				//debug("self.iterateur == 0");
 				
-				debug("raz compteur");
+				//debug("raz compteur");
 				if (self.iterateurX > self.nbRow - 1)
 					self.iterateurX = 0;
 				
-				debug("changement precedant");
+				//debug("changement precedant");
 				if (self.iterateurX - 1 >= 0) //cas ou un précedant existe
 					for(let i = 0; i < self.nbCol; i++)
 						self.buttonTab[i][self.iterateurX - 1].setAttribute("style", "color:black");
@@ -625,32 +660,32 @@ function ClavierVirtuel(keys, actionKeys, nc, nr)
 					for(let i = 0; i < self.nbCol; i++)
 						self.buttonTab[i][self.nbRow - 1].setAttribute("style", "color:black");
 					
-				debug("changement courant");
+				//debug("changement courant");
 				for(let i = 0; i < self.nbCol; i++)
 					self.buttonTab[i][self.iterateurX].setAttribute("style", "color:red");
 				
 				self.iterateurX++;
-				debug("incrementation x");
+				//debug("incrementation x");
 			}
 			else if (self.iterateur == 1) //on est sur les y ligne
 			{
-				debug("self.iterateur == 1");
+				//debug("self.iterateur == 1");
 				
-				debug("raz compteur");
+				//debug("raz compteur");
 				if (self.iterateurY > self.nbCol - 1)
 					self.iterateurY = 0;
 				
-				debug("changement precedant");
+				//debug("changement precedant");
 				if (self.iterateurY - 1 >= 0) //cas ou un précedant existe
 					self.buttonTab[self.iterateurY - 1][self.iterateurX - 1].setAttribute("style", "color:red");
 				else //cas ou le precedant est le dernier elt
 					self.buttonTab[self.nbCol - 1][self.iterateurX - 1].setAttribute("style", "color:red");
 				
-				debug("changement courant");
+				//debug("changement courant");
 				self.buttonTab[self.iterateurY][self.iterateurX - 1].setAttribute("style", "color:blue");
 				
 				self.iterateurY++;
-				debug("incrementation y");
+				//debug("incrementation y");
 			}
 			
 			clearTimeout(self.timer);
