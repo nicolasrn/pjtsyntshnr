@@ -62,6 +62,12 @@ Utils.getValuesOfKeys = function(obj)
 	return keys;
 }
 
+Utils.pause = function (ms) {
+	ms += new Date().getTime();
+	while (new Date() < ms){}
+}
+
+
 mutils = new Utils();
 
 Timer = function()
@@ -111,11 +117,6 @@ function debug(str)
 	document.getElementById('debug').value = str + "\n" + document.getElementById('debug').value;
 }
 
-function pausecomp(ms) {
-	ms += new Date().getTime();
-	while (new Date() < ms){}
-}
-
 /**
  *Classe ou tableau associatif regroupant les différentes commandes boutons
  */
@@ -128,7 +129,7 @@ Command = {
 	
 	buttonPressed: function () 
 	{
-		pausecomp(1000);
+		Utils.pause(1000);
 		let retStop = clavierCourant.stop();
 		//setTimeout(function() {
 			let retExec = clavierCourant.execute();
