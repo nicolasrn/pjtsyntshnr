@@ -38,6 +38,10 @@
 			
 			</hbox>
 			
+			<hbox id="boxClavierSpec">
+			
+			</hbox>
+			
 			<hbox id="boxDebug">
 			
 			</hbox>
@@ -66,17 +70,17 @@
 				
 				clavierFavori.createKeyBoard('boxClavierFavori');
 				
-				clavierTest.createKeyBoard('boxDebug');
+				clavierSpec.createKeyBoard('boxClavierSpec');
 				
 				//clavierCourant = clavierFavori;
 				clavierCourant.display();
 				clavierCourant.start(true);
 				
-				let win = document.getElementById('mainPage');
+				//let win = document.getElementById('mainPage');
 				//win.addEventListener('keypress', Command.buttonPressed, false);
-				win.addEventListener('click', Command.buttonPressed, false);
+				//win.addEventListener('click', Command.buttonPressed, false);
 				
-				/*INTERVAL = 5;
+				INTERVAL = 5;
 				act = function()
 				{
 					let a = stick.getA();

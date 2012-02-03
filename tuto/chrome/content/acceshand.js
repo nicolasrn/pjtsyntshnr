@@ -128,15 +128,15 @@ Command = {
 	
 	buttonPressed: function () 
 	{
-		//Utils.pause(1000);
+		Utils.pause(1000);
 		let retStop = clavierCourant.stop();
-		setTimeout(function() {
+		//setTimeout(function() {
 			let retExec = clavierCourant.execute();
 			//debug("dans le clique : stop = " + retStop);
 			//debug("dans le clique : exec = " + retExec);
 			//alert("execute ? " + ret);
 			clavierCourant.start(retStop);
-		}, 1000); //temporisation necessaire apparement pour le click*/
+		//}, 1000); //temporisation necessaire apparement pour le click*/
 	},
 	
 	//fonction clavierPrincipal
@@ -170,6 +170,13 @@ Command = {
 		clavierCourant = clavierAlpha;
 		clavierCourant.display();
 	},
+
+	spec: function()
+	{
+		clavierPrec = clavierCourant;
+		clavierCourant = clavierSpec;
+		clavierCourant.display();
+	},
 	
 	favoris: function()
 	{
@@ -198,14 +205,16 @@ Command = {
 	{
 		$.ajax({
 			   type: "GET",
-			   url: "localhost",
+			   url: "http://localhost/projet%20synthese/cgiC/Debug/cgiC.cgi",
+			   //url: "http://localhost/projet%20synthese/cgiSharp/cgiSharp/cgiSharp/bin/Debug/cgiSharp.exe",
 			   data: "x=200&y=200",
-			   success: function(msg){
-			     alert( "nickel" );
-			   },
-			   error: function()
+			   success: function(msg)
 			   {
-				   alert("pepin");
+				   alert( "nickel" + msg);
+			   },
+			   error: function(jqXHR, textStatus, errorThrown)
+			   {
+				   alert("pepin " + jqXHR + "\n" + textStatus + "\n" + errorThrown);
 			   }
 			 });
 	},
@@ -254,6 +263,16 @@ Command = {
 		let key = target.ownerDocument.createEvent("KeyEvents");
 		key.initKeyEvent("keypress", true, true, null, false, false, false, false, 0, char.charCodeAt(0));
 		//key.initKeyEvent("keypress", true, true, null, false, false, false, false, /*ici pour les caracteres speciaux*/, 0);
+		target.dispatchEvent(key);
+		key.stopPropagation;
+	},
+	
+	special: function(char)
+	{
+		let target = this.utils.getMainWindow().liberator.modules.buffer.lastInputField;
+		target.focus();
+		let key = target.ownerDocument.createEvent("KeyEvents");
+		key.initKeyEvent("keypress", true, true, null, false, false, false, false, char, 0);
 		target.dispatchEvent(key);
 		key.stopPropagation;
 	},
@@ -808,8 +827,8 @@ function ClavierVirtuel(keys, actionKeys, nc, nr)
 clavierCourant = null;
 clavierPrec = null;
 
-nomClavierPrincipal = new Array(	"onglet", 			"page", 		    "clavier", 			"favoris", 			 "lien",               	"Souris" ,"retour");
-actionClavierPrincipal = new Array("Command.onglet()", "Command.page()", "Command.alpha()", "Command.favoris()", "Command.navigation()", "Command.souris()", "Command.retour()");
+nomClavierPrincipal = new Array(	"onglet", 			"page", 		    "clavier", 			"favoris", 			 "lien",               	"Souris" ,		 "Special", "retour");
+actionClavierPrincipal = new Array("Command.onglet()", "Command.page()", "Command.alpha()", "Command.favoris()", "Command.navigation()", "Command.souris()", "Command.spec()", "Command.retour()");
 clavierPrincipal = new ClavierVirtuel(nomClavierPrincipal, actionClavierPrincipal);
 
 nomClavierPage = new Array("monter", "descendre", "précédent", "suivant", "retour");
@@ -844,7 +863,8 @@ nomClavierAlpha.push("retour");
 actionClavierAlpha.push("Command.retour()");
 clavierAlpha = new ClavierVirtuel(nomClavierAlpha, actionClavierAlpha, 5, 6);
 
-clavierTest = new ClavierVirtuel(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'], [], 5, 3);
+clavierSpec = new ClavierVirtuel(['entre', 				'retour', 				'gauche', 				'droite', 				'haut', 				'bas'], 
+								["Command.special(13)", "Command.special(8)", "Command.special(37)", "Command.special(39)", "Command.special(38)", "Command.special(40)"], 3, 2);
 
 
 
