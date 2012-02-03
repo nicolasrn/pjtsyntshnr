@@ -137,6 +137,7 @@ Joystick.createPlugin = function() {
 			 */
 			var found = false;
 			for (var n = 0; n < navigator.plugins.length; n++) {
+				alert(navigator.plugins[n].name);
 				if (navigator.plugins[n].name.indexOf("Joystick") != -1) {
 					found = true;
 					break;

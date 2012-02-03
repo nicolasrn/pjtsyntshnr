@@ -67,7 +67,6 @@ Utils.pause = function (ms) {
 	while (new Date() < ms){}
 }
 
-
 mutils = new Utils();
 
 Timer = function()
@@ -129,15 +128,15 @@ Command = {
 	
 	buttonPressed: function () 
 	{
-		Utils.pause(1000);
+		//Utils.pause(1000);
 		let retStop = clavierCourant.stop();
-		//setTimeout(function() {
+		setTimeout(function() {
 			let retExec = clavierCourant.execute();
 			//debug("dans le clique : stop = " + retStop);
 			//debug("dans le clique : exec = " + retExec);
 			//alert("execute ? " + ret);
 			clavierCourant.start(retStop);
-		//}, 1000); //temporisation necessaire apparement pour le click*/
+		}, 1000); //temporisation necessaire apparement pour le click*/
 	},
 	
 	//fonction clavierPrincipal
@@ -320,7 +319,7 @@ Command = {
 	
 	recupFavoris: function()
 	{
-		let bookmarks = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"].getService(Components.interfaces.nsINavBookmarksService);
+		/*let bookmarks = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"].getService(Components.interfaces.nsINavBookmarksService);
 		let history = Components.classes["@mozilla.org/browser/nav-history-service;1"].getService(Components.interfaces.nsINavHistoryService);
 		
 		let query = history.getNewQuery();
@@ -360,9 +359,60 @@ Command = {
 			title = title.length > Command.tailleBouton ? title.substr(0, Command.tailleBouton - 3) + "…" : title;
 			nom.push(title);
 		}
-		return [nom, action];
+		return [nom, action];*/
+		var file = Components.classes["@mozilla.org/file/directory_service;1"]
+			.getService(Components.interfaces.nsIProperties)
+			.get("TmpD", Components.interfaces.nsIFile);
+		file.append("favoris.txt");	
+		if (!file.exists())
+			file.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0664);			
+		// ouvrir un flux entrant depuis le fichier
+		var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
+								.createInstance(Components.interfaces.nsIFileInputStream);
+		istream.init(file, 0x01, 0444, 0);
+		istream.QueryInterface(Components.interfaces.nsILineInputStream);
+
+		// lire les lignes dans un tableau
+		var line = {}, lines = [], hasmore;
+		do {
+		  hasmore = istream.readLine(line);
+		  lines.push(line.value); 
+		} while(hasmore);
+
+		istream.close();
+		
+		// traitement des données lues
+		nomFavori=new Array();
+		urlFavori = new Array();
+		for (i=0;i<lines.length;i++)
+		{
+			var dep = lines[i].indexOf(';');
+			var nom = lines[i].substring(0,dep);	
+			var url = lines[i].substring(dep+1,lines[i].length);
+			nomFavori.push(nom);
+			urlFavori.push(url);
+		}		
 	},
 
+	creerClavierFavori: function()
+	{
+		//clavier des favoris
+		//recuperation des favoris dans un tableau pou le nom et un autre pour l'url
+		Command.recupFavoris();
+		actionUrl = new Array();
+		for(i=0;i<urlFavori.length;i++)
+		{
+			actionUrl.push("Command.naviguer(\""+urlFavori[i]+"\")");
+		}
+		//creation des menus supplementaires des favoris et concatenation avec les tableaux précedents
+		nom = new Array("supprimer", "ajouter", "retour");
+		nom = nomFavori.concat(nom);
+		action = new Array("Command.deleteFavori()", "Command.addFavori()", "Command.retour()");
+		action = actionUrl.concat(action);
+		//creation du clavier définitif
+		clavierFavori = new ClavierVirtuel(nom, action);
+	},
+	
 	deleteFavori: function()
 	{
 		/*
@@ -371,17 +421,70 @@ Command = {
 		 * removeFolder(aItemId) - Works for folders and livemarks
 		 * removeFolderChildren(aItemId) - Works for folders and livemarks
 		 */
+		 /*
 		let bmsvc = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"].getService(Components.interfaces.nsINavBookmarksService);
 		let ios = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
 		let uri = ios.newURI(this.utils.getMainWindow().liberator.modules.buffer.URL, null, null);
 		let bookmarksArray = bmsvc.getBookmarkIdsForURI(uri, {});
 		
 		for(let i = 0; i < bookmarksArray.length; i++)
-			bmsvc.removeItem(bookmarksArray[i]);
+			bmsvc.removeItem(bookmarksArray[i]);*/
+			//recupération des informations à supprimer
+		urlS = this.utils.getMainWindow().liberator.modules.buffer.URL;
+		d = urlS.indexOf('.')+1;
+		nomPageS = urlS.substring(d);		
+		f = nomPageS.indexOf('.'); 
+		nomPageS = nomPageS.substring(0,f);
+		//recherche du nom de page à supprimer
+		i=0;
+		while((nomFavori[i]!=nomPageS) && (i<nomFavori.length)){
+			i++;
+		}
+		//si le nom est bien dans les favoris
+		if(i<nomFavori.length)
+		{
+			//échange de la 1ere valeur avec la valeur à supprimer
+			temp=nomFavori[0];
+			nomFavori[0]=nomFavori[i];
+			nomFavori[i]=temp;
+			temp=urlFavori[0];
+			urlFavori[0]=urlFavori[i];
+			urlFavori[i]=temp;
+			//suppression dans le tableau nomFavori et urlfavori de la 1ere valeur
+			nomFavori.shift();
+			urlFavori.shift();
+			//réécriture du fichier mis à jour
+			//ecriture de l'information dans le fichier texte adequate de la forme nom;url sur chaque ligne
+			var file = Components.classes["@mozilla.org/file/directory_service;1"]
+						.getService(Components.interfaces.nsIProperties)
+						.get("TmpD", Components.interfaces.nsIFile);
+			file.append("favoris.txt");
+			if(file.exists())
+				file.remove(true);
+			file.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0664);		 
+			// file est un nsIFile, data est une chaîne de caractères
+			var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
+									.createInstance(Components.interfaces.nsIFileOutputStream);
+			// utiliser 0x02 | 0x10 pour ouvrir le fichier en ajout.
+			foStream.init(file,0x02|0x10, 0664, 0); // écrire, créer, tronquer
+			for(i=0;i<nomFavori.length;i++)
+			{
+				foStream.write(nomFavori[i]+";", nomFavori[i].length++);		
+				foStream.write(urlFavori[i]+"\r\n", urlFavori[i].length+3);
+			}
+			foStream.close();
+		}
+		Command.retour();
+		delete (clavierFavori);
+		clavierCourant=clavierPrincipal;
+		Command.creerClavierFavori();
+		clavierFavori.createKeyBoard('boxClavierFavori');
+		Command.favoris();
 	},
 	
 	addFavori: function()
 	{
+	/*
 		let bmsvc = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"].getService(Components.interfaces.nsINavBookmarksService);
 		let ios = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
 		let uri = ios.newURI(this.utils.getMainWindow().liberator.modules.buffer.URL, null, null);
@@ -394,12 +497,12 @@ Command = {
 		//let bookmarksArray = bmsvc.getBookmarkIdsForURI(uri, {});
 		//alert("ici");
 		//alert(bookmarksArray);
-		//alert("ok");
+		//alert("ok");*/
 		
 		/*
 		 * sofiane
 		 */
-		/*url = this.utils.getMainWindow().liberator.modules.buffer.URL;
+		url = this.utils.getMainWindow().liberator.modules.buffer.URL;
 		var indiceDepart = url.indexOf('.')+1;
 		var nomPage = url.substring(indiceDepart);		
 		var indiceFin = nomPage.indexOf('.'); 
@@ -416,9 +519,16 @@ Command = {
 								.createInstance(Components.interfaces.nsIFileOutputStream);
 		// utiliser 0x02 | 0x10 pour ouvrir le fichier en ajout.
 		foStream.init(file,0x02|0x10, 0664, 0); // écrire, créer, tronquer
-		foStream.write(nomPage+";", nomPage.length+1);		
+		foStream.write("\r\n"+nomPage+";", nomPage.length+4);		
 		foStream.write(url, url.length);
-		foStream.close();*/
+		foStream.close();
+		//mise a jour de l'affichage
+		Command.retour();
+		delete (clavierFavori);
+		clavierCourant=clavierPrincipal;
+		Command.creerClavierFavori();
+		clavierFavori.createKeyBoard('boxClavierFavori');
+		Command.favoris();
 	}
 }
 
@@ -698,7 +808,7 @@ function ClavierVirtuel(keys, actionKeys, nc, nr)
 clavierCourant = null;
 clavierPrec = null;
 
-nomClavierPrincipal = new Array(	"onglet", 			"page", 		 "clavier", 			"favoris", 			 "lien", 				"Souris" ,"retour");
+nomClavierPrincipal = new Array(	"onglet", 			"page", 		    "clavier", 			"favoris", 			 "lien",               	"Souris" ,"retour");
 actionClavierPrincipal = new Array("Command.onglet()", "Command.page()", "Command.alpha()", "Command.favoris()", "Command.navigation()", "Command.souris()", "Command.retour()");
 clavierPrincipal = new ClavierVirtuel(nomClavierPrincipal, actionClavierPrincipal);
 
@@ -721,12 +831,7 @@ nomClavierNumero.push("retour");
 actionClavierNumero.push("Command.retour()");
 clavierNumerique = new ClavierVirtuel(nomClavierNumero, actionClavierNumero, 3, 4);
 
-nomClavierFav = new Array('ajouter', 'supprimer', 'retour');
-actionClavierFav = new Array('Command.addFavori()', 'Command.deleteFavori()', 'Command.retour()');
-let tmp = Command.recupFavoris();
-nomClavierFav = nomClavierFav.concat(tmp[0]);
-actionClavierFav = actionClavierFav.concat(tmp[1]);
-clavierFavori = new ClavierVirtuel(nomClavierFav, actionClavierFav, Math.floor(Math.sqrt(nomClavierFav.length)), Math.ceil(Math.sqrt(nomClavierFav.length)));
+Command.creerClavierFavori();
 
 nomClavierAlpha = new Array();
 actionClavierAlpha = new Array();
@@ -740,6 +845,8 @@ actionClavierAlpha.push("Command.retour()");
 clavierAlpha = new ClavierVirtuel(nomClavierAlpha, actionClavierAlpha, 5, 6);
 
 clavierTest = new ClavierVirtuel(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'], [], 5, 3);
+
+
 
 clavierCourant = clavierPrincipal;
 

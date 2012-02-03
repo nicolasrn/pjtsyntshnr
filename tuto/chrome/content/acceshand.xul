@@ -72,11 +72,11 @@
 				clavierCourant.display();
 				clavierCourant.start(true);
 				
-				//let win = document.getElementById('mainPage');
+				let win = document.getElementById('mainPage');
 				//win.addEventListener('keypress', Command.buttonPressed, false);
-				//win.addEventListener('click', Command.buttonPressed, false);
+				win.addEventListener('click', Command.buttonPressed, false);
 				
-				INTERVAL = 5;
+				/*INTERVAL = 5;
 				act = function()
 				{
 					let a = stick.getA();
@@ -93,7 +93,7 @@
 				}
 				
 				setTimeout(init, 1000);
-				//setTimeout(act, 50);
+				//setTimeout(act, 50);*/
 			})();
    		 </script>
 	</vbox>
