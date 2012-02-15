@@ -42,6 +42,10 @@
 			
 			</hbox>
 			
+			<hbox id="boxClavierBalayage">
+			
+			</hbox>
+			
 			<hbox id="boxDebug">
 			
 			</hbox>
@@ -72,13 +76,15 @@
 				
 				clavierSpec.createKeyBoard('boxClavierSpec');
 				
+				clavierBalayage.createKeyBoard('boxClavierBalayage');
+				
 				//clavierCourant = clavierFavori;
 				clavierCourant.display();
 				clavierCourant.start(true);
 				
-				//let win = document.getElementById('mainPage');
-				//win.addEventListener('keypress', Command.buttonPressed, false);
-				//win.addEventListener('click', Command.buttonPressed, false);
+				let win = document.getElementById('mainPage');
+				win.addEventListener('keypress', Command.buttonPressed, false);
+				win.addEventListener('click', Command.buttonPressed, false);
 				
 				INTERVAL = 5;
 				act = function()
@@ -96,7 +102,7 @@
 					act();
 				}
 				
-				setTimeout(init, 1000);
+				//setTimeout(init, 1000);
 				//setTimeout(act, 50);*/
 			})();
    		 </script>
