@@ -38,10 +38,6 @@
 			
 			</hbox>
 			
-			<hbox id="boxClavierSpec">
-			
-			</hbox>
-			
 			<hbox id="boxClavierBalayage">
 			
 			</hbox>
@@ -52,12 +48,6 @@
     	</vbox>
     	
     	<script type="application/x-javascript;version=1.8">
-    		//function onKeypress(event)
-    		//{
-    		//	alert("changement : " + event);
-    		//	document.getElementById('debug').value = Command.utils.getValuesOfKeys(event).join('\n');
-    		//}
-    		
     		(function() {
     			
     			//document.getElementById('debug').addEventListener('keypress', onKeypress, true);
@@ -73,8 +63,6 @@
 	   		 	clavierAlpha.createKeyBoard('boxClavierAlpha');
 				
 				clavierFavori.createKeyBoard('boxClavierFavori');
-				
-				clavierSpec.createKeyBoard('boxClavierSpec');
 				
 				clavierBalayage.createKeyBoard('boxClavierBalayage');
 				

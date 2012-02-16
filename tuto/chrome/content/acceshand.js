@@ -336,13 +336,6 @@ Command = {
 		clavierCourant.display();
 	},
 
-	spec: function()
-	{
-		clavierPrec = clavierCourant;
-		clavierCourant = clavierSpec;
-		clavierCourant.display();
-	},
-	
 	favoris: function()
 	{
 		clavierPrec = clavierCourant;
@@ -410,25 +403,6 @@ Command = {
 		//}
 	},
 	
-	souris: function()
-	{
-		$.ajax({
-			   type: "GET",
-			   url: "http://localhost/Site/projet%20synthese/cgi/Debug/cgi.cgi",
-			   //url: "http://localhost/projet%20synthese/cgiSharp/cgiSharp/cgiSharp/bin/Debug/cgiSharp.exe",
-			   data: "x=200&y=200",
-			   success: function(msg)
-			   {
-				   //alert(msg);
-			   },
-			   error: function(jqXHR, textStatus, errorThrown)
-			   {
-				   //alert("pepin " + jqXHR + "\n" + textStatus + "\n" + errorThrown);
-			   }
-			 });
-	},
-	
-	
 	//fonction ClavierNumerique
 	numero: function(nb)
 	{
@@ -489,11 +463,13 @@ Command = {
 		//alert("la");
 	},
 	
+	//précédent
 	left: function()
 	{
 		this.utils.getMainWindow().gBrowser.goBack();
 	},
 	
+	//suivant
 	right: function()
 	{
 		this.utils.getMainWindow().gBrowser.goForward();
@@ -507,16 +483,19 @@ Command = {
 		this.utils.getMainWindow().gBrowser.tabContainer.advanceSelectedTab(-1, true);
 	},
 	
+	//onglet droit
 	ongletRight: function()
 	{
 		this.utils.getMainWindow().gBrowser.tabContainer.advanceSelectedTab(1, true);
 	},
 	
+	//fermer l'onglet courrant
 	ongletClose: function()
 	{
 		this.utils.getMainWindow().gBrowser.removeCurrentTab();
 	},
 	
+	//ajouter un onglet
 	ongletAdd: function()
 	{
 		// Add tab    
@@ -524,6 +503,7 @@ Command = {
 		//gBrowser.selectedTab = gBrowser.addTab("http://www.google.com/"); 
 	},
 
+	//naviguer à une URL
 	naviguer: function(url)
 	{
 		//accede a l'url entree en parametre	
@@ -1021,9 +1001,9 @@ function ClavierVirtuel(keys, actionKeys, nc, nr)
 clavierCourant = null;
 clavierPrec = null;
 
-nomClavierPrincipal = new Array(	"onglet", 			"page", 		    "clavier", 			"favoris", 			 "lien",               	"Souris" ,      "Balayage",		 "Special", "retour");
-actionClavierPrincipal = new Array("Command.onglet()", "Command.page()", "Command.alpha()", "Command.favoris()", "Command.navigation()", "Command.souris()","Command.balayage()", "Command.spec()", "Command.retour()");
-clavierPrincipal = new ClavierVirtuel(nomClavierPrincipal, actionClavierPrincipal, 2, 4);
+nomClavierPrincipal = new Array(	"onglet", 			"page", 		    "clavier", 			"favoris", 			 "lien",               	 "Balayage");
+actionClavierPrincipal = new Array("Command.onglet()", "Command.page()", "Command.alpha()", "Command.favoris()", "Command.navigation()", "Command.balayage()");
+clavierPrincipal = new ClavierVirtuel(nomClavierPrincipal, actionClavierPrincipal);
 
 nomClavierPage = new Array("monter", "descendre", "précédent", "suivant", "retour");
 actionClavierPage = new Array("Command.up()", "Command.down()", "Command.left()", "Command.right()", "Command.retour()");
@@ -1050,117 +1030,27 @@ clavierNumerique = new ClavierVirtuel(nomClavierNumero, actionClavierNumero, 3, 
 
 Command.creerClavierFavori();
 
-nomClavierAlpha = new Array();
+nomClavierAlpha = new Array('1', '2', '3', '4', '5', '6', 
+							'7', '8', '9', '0', '<-', 'a',
+							'z', 'e', 'r', 't', 'y', 'u', 
+							'i', 'o', 'p', 'entre', 'q', 's', 
+							'd', 'f', 'g', 'h', 'j', 'k',
+							'l', 'm', 'w', 'x', 'c', 'v',
+							'b', 'n', 'gauche', 'droit', 'bas', 'haut');
 actionClavierAlpha = new Array();
-for(let i = 97; i < 97 + 26; i++)
-{
-	nomClavierAlpha.push(String.fromCharCode(i));
-	actionClavierAlpha.push("Command.caractere('"+String.fromCharCode(i)+"')");
-}
+
+for(let i = 0; i < nomClavierAlpha.length; i++)
+	actionClavierAlpha.push("Command.caractere('"+nomClavierAlpha[i]+"')");
+
+actionClavierAlpha[10] = "Command.special(8)";
+actionClavierAlpha[21] = "Command.special(13)";
+actionClavierAlpha[38] = "Command.special(37)";
+actionClavierAlpha[39] = "Command.special(39)";
+actionClavierAlpha[40] = "Command.special(40)";
+actionClavierAlpha[41] = "Command.special(38)";
+
 nomClavierAlpha.push("retour");
 actionClavierAlpha.push("Command.retour()");
-clavierAlpha = new ClavierVirtuel(nomClavierAlpha, actionClavierAlpha, 5, 6);
-
-clavierSpec = new ClavierVirtuel(['entre', 				'retour', 				'gauche', 				'droite', 				'haut', 				'bas'], 
-								["Command.special(13)", "Command.special(8)", "Command.special(37)", "Command.special(39)", "Command.special(38)", "Command.special(40)"], 3, 2);
+clavierAlpha = new ClavierVirtuel(nomClavierAlpha, actionClavierAlpha, 8, 6);
 
 clavierCourant = clavierPrincipal;
-
-/*
-function murl()
-{
-	//alert(mainWindow.getBrowser().selectedBrowser.contentWindow.location.href);
-	//mainWindow.getBrowser().selectedBrowser.contentWindow.location.href = "http://siteduzero.com";
-	alert(mainWindow.getBrowser().selectedBrowser.contentWindow.document.getElementById('acces_rapide').innerHTML);
-}
-
-function googler()
-{
-	//var elt = document.getElementById("liberator-commandline-command");
-	//commandline.triggerCallback("submit", this._currentExtendedMode, command);
-	mainWindow.liberator.execute("tabopen http://www.google.fr");
-}
-
-function quitter()
-{
-	mainWindow.liberator.execute("xall");
-}
-
-function next()
-{
-	mainWindow.liberator.execute("forward");
-	//document.getElementById("liberator-multiline-output").contentWindow.scrollByLines(1);
-}
-
-function back()
-{
-	mainWindow.liberator.execute("back");
-}
-
-function naviguer()
-{
-	urll = mainWindow.liberator.modules.buffer.URL;
-	alert("url " + urll);
-	let map = mainWindow.liberator.modules.mappings["get"](1, "f", urll);
-	alert("map : " + map);
-	map.execute(null, null);
-}
-
-function up()
-{
-	mainWindow.liberator.modules.buffer.scrollLines(-5);
-}
-
-function down()
-{
-	mainWindow.liberator.modules.buffer.scrollLines(5);
-}
-
-//string.charCodeAt(0); pour récupérer le code ascii
-//String.fromCharCode(65) : pour récupérer la valeur du code
-function numero(nb)
-{
-	var evt = document.createEvent("Events");
-    evt.initEvent("keypress", true, true);
-
-    evt.view = window;
-    evt.altKey = false;
-    evt.ctrlKey = false;
-    evt.shiftKey = false;
-    evt.metaKey = false;
-    evt.keyCode = "" + nb;
-    evt.charCode = ("" + nb).charCodeAt(0);
-    
-	mainWindow.liberator.modules.hints.onEvent(evt);
-}
-
-function ecrire()
-{
-	elem = mainWindow.liberator.modules.buffer.lastInputField;
-	//alert(elem.innerHTML);
-    elem.value+="ok";
-    elem.focus();
-}
-
-function afficher()
-{
-	//document.getElementsByTagName('button')[0].setAttribute("style", "color:blue");
-	var champ = document.getElementById('champBouton');
-	//champ.setAttribute("style", "background-color:blue");
-	champ.setAttribute("hidden", "true");
-}
-
-var i = 0;
-function afficher2()
-{
-	elems = document.getElementsByTagName('button');
-	i = i % elems.length;
-	if (i - 1 >= 0)
-		elems[i-1].setAttribute("style", "color:black");
-	if (i == 0)
-		elems[elems.length-1].setAttribute("style", "color:black");
-	elems[i].setAttribute("style", "color:red");
-	i = i + 1;
-	setTimeout("afficher2()", 1000);
-}
-//*/
