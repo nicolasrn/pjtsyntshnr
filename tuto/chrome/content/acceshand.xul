@@ -78,7 +78,7 @@
 				act = function()
 				{
 					let a = stick.getA();
-					document.getElementById("debug").value = a;
+					//document.getElementById("debug").value = a;
 					if (a != false)
 						Command.buttonPressed();
 					setTimeout(act, INTERVAL);
