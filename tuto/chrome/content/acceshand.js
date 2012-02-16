@@ -265,6 +265,69 @@ Balayage = {
 	}	
 }
 
+transcription = 
+{
+	"11" : ["101", "69"],
+	"12" : ["115", "83"],
+	"13" : ["97", "65"],
+	"14" : ["110", "78"],
+	"15" : ["114", "82"],
+	"16" : ["117", "85"],
+	"17" : ["118", "86"],
+	"18" : ["32", "32"],
+	"19" : ["44", "44"],
+	"20" : ["", ""],
+	"21" : ["105", "73"],
+	"22" : ["108", "76"],
+	"23" : ["111", "79"],
+	"24" : ["39", "52"],
+	"25" : ["113", "81"],
+	"26" : ["102", "70"],
+	"27" : ["135", "57"],
+	"28" : ["94", "94"],
+	"29" : ["34", "51"],
+	"30" : ["", ""],
+	"31" : ["116", "84"],
+	"32" : ["100", "68"],
+	"33" : ["99", "67"],
+	"34" : ["133", "48"],
+	"35" : ["98", "66"],
+	"36" : ["103", "71"],
+	"37" : ["122", "90"],
+	"38" : ["58", "37"],
+	"39" : ["119", "87"],
+	"40" : ["", ""],
+	"41" : ["112", "80"],
+	"42" : ["104", "72"],
+	"43" : ["106", "74"],
+	"44" : ["40", "40"],
+	"45" : ["41", "41"],
+	"46" : ["138", "55"],
+	"47" : ["64", "49"],
+	"48" : ["60", "60"],
+	"49" : ["91", "93"],
+	"50" : ["", ""],
+	"51" : ["109", "77"],
+	"52" : ["46", "53"],
+	"53" : ["45", "45"],
+	"54" : ["47", "/"],
+	"55" : ["63", "54"],
+	"56" : ["151", "56"],
+	"57" : ["8", "8"],
+	"58" : ["59", "61"],
+	"59" : ["", ""],
+	"60" : ["", ""],
+	"61" : ["130", "50"],
+	"62" : ["120", "88"],
+	"63" : ["121", "89"],
+	"64" : ["33", "43"],
+	"65" : ["107", "75"],
+	"66" : ["42", "42"],
+	"67" : ["13", "39"],
+	"68" : ["", "38"],
+	"69" : ["", "37"]
+}
+
 /**
  *Classe ou tableau associatif regroupant les différentes commandes boutons
  */
@@ -274,6 +337,10 @@ Command = {
 	tailleBouton: 50,
 	
 	timerNavigation: false,
+
+	nbSaisi: 0,
+	buff: "",
+	typeEntre: 0, /*0 = minuscule; 1 = majuscule*/
 	
 	buttonPressed: function () 
 	{
@@ -334,6 +401,7 @@ Command = {
 		clavierPrec = clavierCourant;
 		clavierCourant = clavierAlpha;
 		clavierCourant.display();
+		Command.nbSaisi = 0;
 	},
 
 	favoris: function()
@@ -429,10 +497,56 @@ Command = {
 		let target = this.utils.getMainWindow().liberator.modules.buffer.lastInputField;
 		target.focus();
 		let key = target.ownerDocument.createEvent("KeyEvents");
-		key.initKeyEvent("keypress", true, true, null, false, false, false, false, 0, char.charCodeAt(0));
+		key.initKeyEvent("keypress", true, true, null, false, false, false, false, 0, char);
 		//key.initKeyEvent("keypress", true, true, null, false, false, false, false, /*ici pour les caracteres speciaux*/, 0);
 		target.dispatchEvent(key);
 		key.stopPropagation;
+	},
+	
+	clavierIntuitif: function(char)
+	{
+		Command.nbSaisi = Command.nbSaisi + 1;
+		try
+		{
+			if (Command.nbSaisi == 2)
+			{
+				Command.buff += char;
+				switch (Command.buff)
+				{
+					case "67":
+					case "57":
+					case "69":
+					case "67":
+						Command.special(transcription[Command.buff][Command.typeEntre]);
+						break;
+					case "59":
+						if (document.getElementById("clavier").getAttribute("class") == "Minuscule")
+						{
+							document.getElementById("clavier").setAttribute("class", "Majuscule");
+							Command.typeEntre = 1;
+						}
+						else
+						{
+							document.getElementById("clavier").setAttribute("class", "Minuscule");
+							Command.typeEntre = 0;
+						}
+					default:
+						Command.caractere(transcription[Command.buff][Command.typeEntre]);
+				}
+				Command.buff = "";
+				Command.nbSaisi = 0;
+			}
+			else
+			{
+				Command.buff += char;
+			}
+		}
+		catch(e)
+		{
+			Command.buff = "";
+			Command.nbSaisi = 0;
+		}
+		//alert(Command.nbSaisi);
 	},
 	
 	special: function(char)
@@ -747,6 +861,8 @@ function ClavierVirtuel(keys, actionKeys, nc, nr)
 	//pour l'appel récursif
 	//this.varName = nomVar;
 	
+	this.parent = null;
+	
 	this.selectedButton = 0;
 	
 	//pour l'affichage
@@ -815,6 +931,8 @@ function ClavierVirtuel(keys, actionKeys, nc, nr)
 	{
 		if (this.created == false)//si rien n'a encore ete fait
 		{
+			this.parent = idParent;
+			
 			this.iterateur = 0;//variable de travail
 			let box = document.getElementById(idParent); //contenaire parent
 			this.cntPrincipal = this.addVBox("filsDe"+idParent, false); //contenaire principale 
@@ -842,6 +960,8 @@ function ClavierVirtuel(keys, actionKeys, nc, nr)
 			box.appendChild(this.cntPrincipal);//le containaire principale et rajoute au parent
 			this.created = true; //la creation est termine
 			this.iterateur = 0; // reinitialisation de la variable de travail
+			
+			document.getElementById(this.parent).setAttribute("hidden", "true");
 		}
 	}
 	
@@ -885,12 +1005,14 @@ function ClavierVirtuel(keys, actionKeys, nc, nr)
 	{
 		//document.getElementById('debug').value = getKeys(buttonTab[0]).join("\n");
 		this.cntPrincipal.setAttribute("hidden", "false");
+		document.getElementById(this.parent).setAttribute("hidden", "false");
 	}
 	
 	//masque le clavier
 	this.hidden = function()
 	{
 		this.cntPrincipal.setAttribute("hidden", "true");
+		document.getElementById(this.parent).setAttribute("hidden", "true");
 		this.stop();
 	}
 	
@@ -1030,27 +1152,29 @@ clavierNumerique = new ClavierVirtuel(nomClavierNumero, actionClavierNumero, 3, 
 
 Command.creerClavierFavori();
 
-nomClavierAlpha = new Array('1', '2', '3', '4', '5', '6', 
+/*nomClavierAlpha = new Array('1', '2', '3', '4', '5', '6', 
 							'7', '8', '9', '0', '<-', 'a',
 							'z', 'e', 'r', 't', 'y', 'u', 
 							'i', 'o', 'p', 'entre', 'q', 's', 
 							'd', 'f', 'g', 'h', 'j', 'k',
 							'l', 'm', 'w', 'x', 'c', 'v',
-							'b', 'n', 'gauche', 'droit', 'bas', 'haut');
+							'b', 'n', 'gauche', 'droit', 'bas', 'haut');*/
+nomClavierAlpha = new Array('1', '2', '3', '4', '5', '6', '7', '8', '9', '0');
 actionClavierAlpha = new Array();
 
 for(let i = 0; i < nomClavierAlpha.length; i++)
-	actionClavierAlpha.push("Command.caractere('"+nomClavierAlpha[i]+"')");
+	actionClavierAlpha.push("Command.clavierIntuitif('"+nomClavierAlpha[i]+"')");
 
-actionClavierAlpha[10] = "Command.special(8)";
+/*actionClavierAlpha[10] = "Command.special(8)";
 actionClavierAlpha[21] = "Command.special(13)";
 actionClavierAlpha[38] = "Command.special(37)";
 actionClavierAlpha[39] = "Command.special(39)";
 actionClavierAlpha[40] = "Command.special(40)";
-actionClavierAlpha[41] = "Command.special(38)";
+actionClavierAlpha[41] = "Command.special(38)";*/
 
 nomClavierAlpha.push("retour");
 actionClavierAlpha.push("Command.retour()");
-clavierAlpha = new ClavierVirtuel(nomClavierAlpha, actionClavierAlpha, 8, 6);
+//clavierAlpha = new ClavierVirtuel(nomClavierAlpha, actionClavierAlpha, 8, 6);
+clavierAlpha = new ClavierVirtuel(nomClavierAlpha, actionClavierAlpha, 4, 3);
 
 clavierCourant = clavierPrincipal;

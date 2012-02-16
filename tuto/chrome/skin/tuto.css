@@ -1,7 +1,7 @@
-#test{
-	text-align : center;
+.Minuscule {
+	list-style-image: url("chrome://acceshand/skin/clavierMin.png");
 }
 
-a{
-	text-decoration : none;
+.Majuscule {
+	list-style-image: url("chrome://acceshand/skin/clavierMaj.png");
 }
