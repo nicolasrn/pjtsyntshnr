@@ -277,15 +277,15 @@ Command = {
 	
 	buttonPressed: function () 
 	{
-		//Utils.pause(1000);
+		Utils.pause(1000);
 		let retStop = clavierCourant.stop();
-		setTimeout(function() {
+		//setTimeout(function() {
 			let retExec = clavierCourant.execute();
 			//debug("dans le clique : stop = " + retStop);
 			//debug("dans le clique : exec = " + retExec);
 			//alert("execute ? " + ret);
 			clavierCourant.start(retStop);
-		}, 1000); //temporisation necessaire apparement pour le click*/
+		//}, 1000); //temporisation necessaire apparement pour le click*/
 	},
 	
 	//fonction clavierPrincipal
@@ -374,8 +374,25 @@ Command = {
 		Balayage.stopDessin();
 		Command.retour();
 		//simuler le clic en (Balayage.clicX, Balayage.clicY)
-		alert(Balayage.clicX+" : "+Balayage.clicY);
+		//alert(Balayage.clicX+" : "+Balayage.clicY);
 		
+		let page = document.getElementById("mainPage");
+		//debug(Utils.getKeys(document.getElementById("mainPage")).join("\n"));
+		//alert("top : " + page.clientTop + "\n" + "clientLeft : " + page.clientLeft + "\n" + "clientHeight : " + page.clientHeight + "\n" + "clientWidth : " + page.clientWidth);
+		
+		$.ajax({
+			   type: "GET",
+			   url: "http://localhost/Site/projet%20synthese/cgi/Debug/cgi.cgi",
+			   data: "x="+(Balayage.clicX + page.clientWidth)+"&y="+(Balayage.clicY + 63),
+			   success: function(msg)
+			   {
+				   alert(msg);
+			   },
+			   error: function(jqXHR, textStatus, errorThrown)
+			   {
+				   //alert("pepin " + jqXHR + "\n" + textStatus + "\n" + errorThrown);
+			   }
+			 });
 	},
 	
 	navigation: function()
@@ -383,7 +400,7 @@ Command = {
 		urll = this.utils.getMainWindow().liberator.modules.buffer.URL;
 		//let map = this.utils.getMainWindow().liberator.modules.mappings["get"](1, "f", urll);
 		//map.execute(null, null);
-		this.utils.getMainWindow().liberator.modules.hints.show('o', undefined, undefined, true, true);
+		this.utils.getMainWindow().liberator.modules.hints.show('o', undefined, undefined, true, false);
 		this.numerique();
 		//timer.urlPagePred = this.utils.getMainWindow().getBrowser().selectedBrowser.contentWindow.location.href;
 		//if (this.timerNavigation == false)
@@ -397,16 +414,16 @@ Command = {
 	{
 		$.ajax({
 			   type: "GET",
-			   url: "http://localhost/projet%20synthese/cgiC/Debug/cgiC.cgi",
+			   url: "http://localhost/Site/projet%20synthese/cgi/Debug/cgi.cgi",
 			   //url: "http://localhost/projet%20synthese/cgiSharp/cgiSharp/cgiSharp/bin/Debug/cgiSharp.exe",
 			   data: "x=200&y=200",
 			   success: function(msg)
 			   {
-				   alert( "nickel" + msg);
+				   //alert(msg);
 			   },
 			   error: function(jqXHR, textStatus, errorThrown)
 			   {
-				   alert("pepin " + jqXHR + "\n" + textStatus + "\n" + errorThrown);
+				   //alert("pepin " + jqXHR + "\n" + textStatus + "\n" + errorThrown);
 			   }
 			 });
 	},
@@ -1006,7 +1023,7 @@ clavierPrec = null;
 
 nomClavierPrincipal = new Array(	"onglet", 			"page", 		    "clavier", 			"favoris", 			 "lien",               	"Souris" ,      "Balayage",		 "Special", "retour");
 actionClavierPrincipal = new Array("Command.onglet()", "Command.page()", "Command.alpha()", "Command.favoris()", "Command.navigation()", "Command.souris()","Command.balayage()", "Command.spec()", "Command.retour()");
-clavierPrincipal = new ClavierVirtuel(nomClavierPrincipal, actionClavierPrincipal);
+clavierPrincipal = new ClavierVirtuel(nomClavierPrincipal, actionClavierPrincipal, 2, 4);
 
 nomClavierPage = new Array("monter", "descendre", "précédent", "suivant", "retour");
 actionClavierPage = new Array("Command.up()", "Command.down()", "Command.left()", "Command.right()", "Command.retour()");
@@ -1046,8 +1063,6 @@ clavierAlpha = new ClavierVirtuel(nomClavierAlpha, actionClavierAlpha, 5, 6);
 
 clavierSpec = new ClavierVirtuel(['entre', 				'retour', 				'gauche', 				'droite', 				'haut', 				'bas'], 
 								["Command.special(13)", "Command.special(8)", "Command.special(37)", "Command.special(39)", "Command.special(38)", "Command.special(40)"], 3, 2);
-
-
 
 clavierCourant = clavierPrincipal;
 
