@@ -191,13 +191,13 @@ Balayage = {
 		strNewPoints='';
 		for(i=1 ; i<nbPointCentraux ; i++)
 		{
-			strNewPoints+='<div style="font-size:1px; width:1px; height:1px; background-color:'+color+'; position:absolute; top:'+Math.round(y1+i*stepY)+'px; left:'+Math.round(x1+i*stepX)+'px; ">&nbsp;</div>';
+			strNewPoints+='<div style="z-index:100;font-size:1px; width:1px; height:1px; background-color:'+color+'; position:absolute; top:'+Math.round(y1+i*stepY)+'px; left:'+Math.round(x1+i*stepX)+'px; ">&nbsp;</div>';
 		}
 		
 		//pointe de depart
-		strNewPoints+='<div style="font-size:1px; width:3px; height:3px; background-color:'+color+'; position:absolute; top:'+(y1-1)+'px; left:'+(x1-1)+'px; ">&nbsp;</div>';
+		strNewPoints+='<div style="z-index:100;font-size:1px; width:3px; height:3px; background-color:'+color+'; position:absolute; top:'+(y1-1)+'px; left:'+(x1-1)+'px; ">&nbsp;</div>';
 		//point d'arrive
-		strNewPoints+='<div style="font-size:1px; width:3px; height:3px; background-color:'+color+'; position:absolute; top:'+(y2-1)+'px; left:'+(x2-1)+'px; ">&nbsp;</div>';
+		strNewPoints+='<div style="z-index:100;font-size:1px; width:3px; height:3px; background-color:'+color+'; position:absolute; top:'+(y2-1)+'px; left:'+(x2-1)+'px; ">&nbsp;</div>';
 
 		
 		//on suprimme tous les points actuels et on mets les nouveaux div en place
@@ -283,14 +283,14 @@ transcription =
 	"24" : ["39", "52"],
 	"25" : ["113", "81"],
 	"26" : ["102", "70"],
-	"27" : ["135", "57"],
+	"27" : ["231", "57"],
 	"28" : ["94", "94"],
 	"29" : ["34", "51"],
 	"30" : ["", ""],
 	"31" : ["116", "84"],
 	"32" : ["100", "68"],
 	"33" : ["99", "67"],
-	"34" : ["133", "48"],
+	"34" : ["224", "48"],
 	"35" : ["98", "66"],
 	"36" : ["103", "71"],
 	"37" : ["122", "90"],
@@ -302,7 +302,7 @@ transcription =
 	"43" : ["106", "74"],
 	"44" : ["40", "40"],
 	"45" : ["41", "41"],
-	"46" : ["138", "55"],
+	"46" : ["232", "55"],
 	"47" : ["64", "49"],
 	"48" : ["60", "60"],
 	"49" : ["91", "93"],
@@ -310,21 +310,21 @@ transcription =
 	"51" : ["109", "77"],
 	"52" : ["46", "53"],
 	"53" : ["45", "45"],
-	"54" : ["47", "/"],
+	"54" : ["47", "47"],
 	"55" : ["63", "54"],
-	"56" : ["151", "56"],
+	"56" : ["249", "56"],
 	"57" : ["8", "8"],
-	"58" : ["59", "61"],
+	"58" : ["59", "59"],
 	"59" : ["", ""],
 	"60" : ["", ""],
-	"61" : ["130", "50"],
+	"61" : ["233", "50"],
 	"62" : ["120", "88"],
 	"63" : ["121", "89"],
 	"64" : ["33", "43"],
 	"65" : ["107", "75"],
 	"66" : ["42", "42"],
 	"67" : ["13", "39"],
-	"68" : ["", "38"],
+	"68" : ["168", "168"],
 	"69" : ["", "37"]
 }
 
@@ -334,7 +334,7 @@ transcription =
 Command = {
 	utils: mutils,
 	
-	tailleBouton: 50,
+	tailleBouton: 25,
 	
 	timerNavigation: false,
 
@@ -441,10 +441,22 @@ Command = {
 		//debug(Utils.getKeys(document.getElementById("mainPage")).join("\n"));
 		//alert("top : " + page.clientTop + "\n" + "clientLeft : " + page.clientLeft + "\n" + "clientHeight : " + page.clientHeight + "\n" + "clientWidth : " + page.clientWidth);
 		
+		let fenetre = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+		 .getInterface(Components.interfaces.nsIWebNavigation)
+		 .QueryInterface(Components.interfaces.nsIDocShellTreeItem)
+		 .rootTreeItem.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+		 .getInterface(Components.interfaces.nsIDOMWindow)
+		 .gBrowser.selectedBrowser;
+		
+		let rect = fenetre.getBoundingClientRect();
+		
+		let y = rect.top;
+		let x = rect.left;
+		 
 		$.ajax({
 			   type: "GET",
 			   url: "http://localhost/Site/projet%20synthese/cgi/Debug/cgi.cgi",
-			   data: "x="+(Balayage.clicX + page.clientWidth)+"&y="+(Balayage.clicY + 63),
+			   data: "x="+(Balayage.clicX + x)+"&y="+(Balayage.clicY + y),
 			   success: function(msg)
 			   {
 				   alert(msg);
@@ -516,7 +528,6 @@ Command = {
 					case "67":
 					case "57":
 					case "69":
-					case "67":
 						Command.special(transcription[Command.buff][Command.typeEntre]);
 						break;
 					case "59":
@@ -621,12 +632,14 @@ Command = {
 	naviguer: function(url)
 	{
 		//accede a l'url entree en parametre	
+		//alert(url);
 		this.utils.getMainWindow().gBrowser.addTab(url); 
 	},
 	
 	recupFavoris: function()
 	{
-		/*let bookmarks = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"].getService(Components.interfaces.nsINavBookmarksService);
+	/*
+		let bookmarks = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"].getService(Components.interfaces.nsINavBookmarksService);
 		let history = Components.classes["@mozilla.org/browser/nav-history-service;1"].getService(Components.interfaces.nsINavHistoryService);
 		
 		let query = history.getNewQuery();
@@ -666,7 +679,9 @@ Command = {
 			title = title.length > Command.tailleBouton ? title.substr(0, Command.tailleBouton - 3) + "…" : title;
 			nom.push(title);
 		}
-		return [nom, action];*/
+		return [nom, action];
+	//*/
+	//*
 		var file = Components.classes["@mozilla.org/file/directory_service;1"]
 			.getService(Components.interfaces.nsIProperties)
 			.get("TmpD", Components.interfaces.nsIFile);
@@ -698,14 +713,24 @@ Command = {
 			var url = lines[i].substring(dep+1,lines[i].length);
 			nomFavori.push(nom);
 			urlFavori.push(url);
-		}		
+		}
+	//*/
 	},
 
 	creerClavierFavori: function()
 	{
 		//clavier des favoris
 		//recuperation des favoris dans un tableau pou le nom et un autre pour l'url
+	
+	/*
+		let tmp = Command.recupFavoris();
+		tmp[0] = tmp[0].concat(new Array("supprimer", "ajouter", "retour"));
+		tmp[1] = tmp[1].concat(new Array("Command.deleteFavori()", "Command.addFavori()", "Command.retour()"));
+		clavierFavori = new ClavierVirtuel(tmp[0], tmp[1], 5, 5);
+	//*/
+	//*
 		Command.recupFavoris();
+		
 		actionUrl = new Array();
 		for(i=0;i<urlFavori.length;i++)
 		{
@@ -718,6 +743,7 @@ Command = {
 		action = actionUrl.concat(action);
 		//creation du clavier définitif
 		clavierFavori = new ClavierVirtuel(nom, action);
+	//*/
 	},
 	
 	deleteFavori: function()
@@ -728,15 +754,24 @@ Command = {
 		 * removeFolder(aItemId) - Works for folders and livemarks
 		 * removeFolderChildren(aItemId) - Works for folders and livemarks
 		 */
-		 /*
+	/*	
 		let bmsvc = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"].getService(Components.interfaces.nsINavBookmarksService);
 		let ios = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
 		let uri = ios.newURI(this.utils.getMainWindow().liberator.modules.buffer.URL, null, null);
 		let bookmarksArray = bmsvc.getBookmarkIdsForURI(uri, {});
 		
 		for(let i = 0; i < bookmarksArray.length; i++)
-			bmsvc.removeItem(bookmarksArray[i]);*/
-			//recupération des informations à supprimer
+			bmsvc.removeItem(bookmarksArray[i]);
+		
+		Command.retour();
+		delete (clavierFavori);
+		clavierCourant=clavierPrincipal;
+		Command.creerClavierFavori();
+		clavierFavori.createKeyBoard('boxClavierFavori');
+		Command.favoris();
+	//*/
+	//*		
+		//recupération des informations à supprimer
 		urlS = this.utils.getMainWindow().liberator.modules.buffer.URL;
 		d = urlS.indexOf('.')+1;
 		nomPageS = urlS.substring(d);		
@@ -787,6 +822,7 @@ Command = {
 		Command.creerClavierFavori();
 		clavierFavori.createKeyBoard('boxClavierFavori');
 		Command.favoris();
+	//*/
 	},
 	
 	addFavori: function()
@@ -799,16 +835,23 @@ Command = {
 		
 		title = title.length > Command.tailleBouton ? title.substr(0, Command.tailleBouton - 3) + "…" : title;
 		let newBkmkId = bmsvc.insertBookmark(bmsvc.bookmarksMenuFolder, uri, bmsvc.DEFAULT_INDEX, title);
+		
+		//mise a jour de l'affichage
+		Command.retour();
+		delete (clavierFavori);
+		clavierCourant=clavierPrincipal;
+		Command.creerClavierFavori();
+		clavierFavori.createKeyBoard('boxClavierFavori');
+		Command.favoris();
+		
 		//uri = getBookmarkURI(id)
 		//alert("la");
 		//let bookmarksArray = bmsvc.getBookmarkIdsForURI(uri, {});
 		//alert("ici");
 		//alert(bookmarksArray);
-		//alert("ok");*/
-		
-		/*
-		 * sofiane
-		 */
+		//alert("ok");
+	//*/
+	//*
 		url = this.utils.getMainWindow().liberator.modules.buffer.URL;
 		var indiceDepart = url.indexOf('.')+1;
 		var nomPage = url.substring(indiceDepart);		
@@ -826,7 +869,7 @@ Command = {
 								.createInstance(Components.interfaces.nsIFileOutputStream);
 		// utiliser 0x02 | 0x10 pour ouvrir le fichier en ajout.
 		foStream.init(file,0x02|0x10, 0664, 0); // écrire, créer, tronquer
-		foStream.write("\r\n"+nomPage+";", nomPage.length+4);		
+		foStream.write("\r\n"+nomPage+";", nomPage.length+3);		
 		foStream.write(url, url.length);
 		foStream.close();
 		//mise a jour de l'affichage
@@ -836,6 +879,7 @@ Command = {
 		Command.creerClavierFavori();
 		clavierFavori.createKeyBoard('boxClavierFavori');
 		Command.favoris();
+	//*/
 	}
 }
 
