@@ -4,7 +4,7 @@
 <?xml-stylesheet href="chrome://acceshand/skin/tuto.css" type="text/css" ?>
 <!DOCTYPE page SYSTEM "chrome://acceshand/locale/acceshand.dtd">
 
-<page 	id="mainPage" title="&emptysidebar.title;"
+<page 	id="mainPage" title="&HandiFox.title;"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
 	
 	<script type="application/x-javascript;version=1.8" src="chrome://acceshand/content/acceshand.js"/>

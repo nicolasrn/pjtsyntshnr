@@ -20,12 +20,12 @@
 		
 		<broadcasterset id="mainBroadcasterSet"> 
 			<broadcaster id="viewEmptySidebar" 
-						label="&emptysidebar.title;"
+						label="&HandiFox.title;"
 						autoCheck="false"
 						type="checkbox"
 						group="sidebar"
 						sidebarurl="chrome://acceshand/content/acceshand.xul"
-						sidebartitle="&emptysidebar.title;"
+						sidebartitle="&HandiFox.title;"
 						oncommand="toggleSidebar('viewEmptySidebar');" />
 		</broadcasterset>
 		
