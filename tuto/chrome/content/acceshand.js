@@ -71,7 +71,7 @@ mutils = new Utils();
 
 function TimerBalayage() 
 {
-    var interval=200; //ms
+    var interval=50; //ms
     var onTimerCallBack=null;
     var tickCount=0; //time elapse
     var enabled=false; //run timer
@@ -84,7 +84,7 @@ function TimerBalayage()
     this.start=function () {   
         enabled=true;  
         onTimerCallBack.call();
-        setTimeout(function() {internalOnTimer.apply(this, arguments)}, 200);
+        setTimeout(function() {internalOnTimer.apply(this, arguments)}, 50);
     };
     //stop timer
     this.stop=function() {
@@ -170,10 +170,10 @@ Balayage = {
 	clicY: 0,
 	dessinV: false,
 	stop: 0,
-	myContainer: null,
+	cont: null,	
 	
 	//Fonction permettant de tracer une ligne en JS
-	drawLine: function (x1,y1,x2,y2,color,espacementPointille)
+	drawLine: function (myContainer,x1,y1,x2,y2,color,espacementPointille)
 	{
 		if(espacementPointille<1) { espacementPointille=1; }
 		
@@ -202,14 +202,14 @@ Balayage = {
 		
 		//on suprimme tous les points actuels et on mets les nouveaux div en place
 		//obj container des points
-		this.myContainer.innerHTML=strNewPoints;
+		myContainer.innerHTML=strNewPoints;
 	},
 	
 	dessinerH: function ()
 	{	
-		Balayage.drawLine(Balayage.debutX,Balayage.debutY,Balayage.finX,Balayage.finY,"red",1.0);
-		Balayage.debutY += 2;
-		Balayage.finY += 2;
+		Balayage.drawLine(Balayage.cont,Balayage.debutX,Balayage.debutY,Balayage.finX,Balayage.finY,"red",1.0);
+		Balayage.debutY += 4;
+		Balayage.finY += 4;
 		if (Balayage.debutY>screen.height){
 			Balayage.debutY = 0;
 			Balayage.finY = 0;
@@ -218,9 +218,9 @@ Balayage = {
 
 	dessinerV: function ()
 	{	
-		Balayage.drawLine(Balayage.debutX,Balayage.debutY,Balayage.finX,Balayage.finY,"red",1.0);
-		Balayage.debutX += 2;
-		Balayage.finX += 2;
+		Balayage.drawLine(Balayage.cont,Balayage.debutX,Balayage.debutY,Balayage.finX,Balayage.finY,"red",1.0);
+		Balayage.debutX += 4;
+		Balayage.finX += 4;
 		if (Balayage.debutX>screen.width){
 			Balayage.debutX = 0;
 			Balayage.finX = 0;
@@ -229,7 +229,8 @@ Balayage = {
 
 	choixDessin: function (container){	
 		timerB = new TimerBalayage();
-		this.myContainer = container;
+		this.cont = container;
+		
 		if (!this.dessinV){
 			this.debutX = 0;
 			this.debutY = 0;
@@ -253,14 +254,14 @@ Balayage = {
 			this.clicY = this.debutY;
 			this.dessinV = !this.dessinV;
 			this.stop = 1;
-			this.choixDessin(this.myContainer);
+			this.choixDessin(this.cont);
 		}
 		else{
 			this.clicX = this.debutX;
-			timerB.stop();
+			delete(timerB);
 			this.stop = 0;
 			this.dessinV = !this.dessinV;
-			delete(timerB);	
+				
 		}
 	}	
 }
@@ -332,6 +333,8 @@ transcription =
  *Classe ou tableau associatif regroupant les différentes commandes boutons
  */
 Command = {
+	clic : 0,
+	
 	utils: mutils,
 	
 	tailleBouton: 25,
@@ -418,54 +421,76 @@ Command = {
 		clavierPrec = clavierCourant;
 		clavierCourant = clavierBalayage;
 		clavierCourant.display();		
-		myDiv = '<div id="myDiv"><\div>';
-		this.utils.getMainWindow()._content.document.getElementsByTagName("body")[0].innerHTML += myDiv;		
+		if(!this.utils.getMainWindow()._content.document.getElementById("myDiv"))
+		{
+			myDiv = '<div id="myDiv"><\div>';
+			this.utils.getMainWindow()._content.document.getElementsByTagName("body")[0].innerHTML += myDiv;
+		}			
 		c = this.utils.getMainWindow()._content.document.getElementById("myDiv");
-		Balayage.choixDessin(c);
-		
+		c.hidden = false;
+		/*if(!this.utils.getMainWindow()._content.document.getElementById("myDivH"))
+		{
+			myDivH = '<div id="myDivH"><\div>';
+			this.utils.getMainWindow()._content.document.getElementsByTagName("body")[0].innerHTML += myDivH;
+		}			
+		cH = this.utils.getMainWindow()._content.document.getElementById("myDivH");
+		cH.hidden = false;
+		alert(this.utils.getMainWindow()._content.document.getElementById("myDivH").innerHTML);*/
+		Balayage.choixDessin(c);	
 	},
-	
-	balayer: function()
-	{
-		Balayage.stopDessin();
-	},
+
 	
 	clicBalayage: function()
 	{
-		Balayage.stopDessin();
-		Command.retour();
-		//simuler le clic en (Balayage.clicX, Balayage.clicY)
-		//alert(Balayage.clicX+" : "+Balayage.clicY);
-		
-		let page = document.getElementById("mainPage");
-		//debug(Utils.getKeys(document.getElementById("mainPage")).join("\n"));
-		//alert("top : " + page.clientTop + "\n" + "clientLeft : " + page.clientLeft + "\n" + "clientHeight : " + page.clientHeight + "\n" + "clientWidth : " + page.clientWidth);
-		
-		let fenetre = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-		 .getInterface(Components.interfaces.nsIWebNavigation)
-		 .QueryInterface(Components.interfaces.nsIDocShellTreeItem)
-		 .rootTreeItem.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-		 .getInterface(Components.interfaces.nsIDOMWindow)
-		 .gBrowser.selectedBrowser;
-		
-		let rect = fenetre.getBoundingClientRect();
-		
-		let y = rect.top;
-		let x = rect.left;
-		 
-		$.ajax({
-			   type: "GET",
-			   url: "http://localhost/Site/projet%20synthese/cgi/Debug/cgi.cgi",
-			   data: "x="+(Balayage.clicX + x)+"&y="+(Balayage.clicY + y),
-			   success: function(msg)
-			   {
-				   alert(msg);
-			   },
-			   error: function(jqXHR, textStatus, errorThrown)
-			   {
-				   //alert("pepin " + jqXHR + "\n" + textStatus + "\n" + errorThrown);
-			   }
-			 });
+		if (Command.clic == 0)
+		{
+			Balayage.stopDessin();
+			Command.clic += 1;
+		}
+		else
+		{
+			Balayage.stopDessin();
+			Command.retour();
+			
+			let page = document.getElementById("mainPage");
+			//debug(Utils.getKeys(document.getElementById("mainPage")).join("\n"));
+			//alert("top : " + page.clientTop + "\n" + "clientLeft : " + page.clientLeft + "\n" + "clientHeight : " + page.clientHeight + "\n" + "clientWidth : " + page.clientWidth);
+			
+			let fenetre = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+			 .getInterface(Components.interfaces.nsIWebNavigation)
+			 .QueryInterface(Components.interfaces.nsIDocShellTreeItem)
+			 .rootTreeItem.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+			 .getInterface(Components.interfaces.nsIDOMWindow)
+			 .gBrowser.selectedBrowser;
+			
+			let rect = fenetre.getBoundingClientRect();
+			
+			let y = rect.top;
+			let x = rect.left;
+			 
+			$.ajax({
+				   type: "GET",
+				   url: "http://localhost/Site/projet%20synthese/cgi/Debug/cgi.cgi",
+				   data: "x="+(Balayage.clicX + x)+"&y="+(Balayage.clicY + y),
+				   success: function(msg)
+				   {
+					   //alert(msg);
+				   },
+				   error: function(jqXHR, textStatus, errorThrown)
+				   {
+					   //alert("pepin " + jqXHR + "\n" + textStatus + "\n" + errorThrown);
+				   }
+				 });
+			Command.clic = 0;
+			Command.effacerBalayage();
+		}
+	},
+	
+	effacerBalayage: function()
+	{
+		this.utils.getMainWindow()._content.document.getElementById("myDiv").innerHTML = '';
+		myDiv = this.utils.getMainWindow()._content.document.getElementById("myDiv");
+		myDiv.hidden = true;
 	},
 	
 	navigation: function()
@@ -685,7 +710,7 @@ Command = {
 		var file = Components.classes["@mozilla.org/file/directory_service;1"]
 			.getService(Components.interfaces.nsIProperties)
 			.get("TmpD", Components.interfaces.nsIFile);
-		file.append("favoris.txt");	
+		file.append("favoris.txt");		
 		if (!file.exists())
 			file.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0664);			
 		// ouvrir un flux entrant depuis le fichier
@@ -853,6 +878,7 @@ Command = {
 	//*/
 	//*
 		url = this.utils.getMainWindow().liberator.modules.buffer.URL;
+		alert(url);
 		var indiceDepart = url.indexOf('.')+1;
 		var nomPage = url.substring(indiceDepart);		
 		var indiceFin = nomPage.indexOf('.'); 
@@ -1179,8 +1205,8 @@ nomClavierOnglet = new Array("gauche", "droite", "fermer", "ouvrir", "retour");
 actionClavierOnglet = new Array("Command.ongletLeft()", "Command.ongletRight()", "Command.ongletClose()", "Command.ongletAdd()", "Command.retour()");
 clavierOnglet = new ClavierVirtuel(nomClavierOnglet, actionClavierOnglet);
 
-nomClavierBalayage = new Array("balayer", "clic");
-actionClavierBalayage = new Array("Command.balayer()", "Command.clicBalayage()");
+nomClavierBalayage = new Array("clic");
+actionClavierBalayage = new Array("Command.clicBalayage()");
 clavierBalayage = new ClavierVirtuel(nomClavierBalayage, actionClavierBalayage);
 
 nomClavierNumero = new Array();
