@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE overlay SYSTEM "chrome://acceshand/locale/acceshand.dtd">
+<overlay id="acceshandoverlay"
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<window>
+		<menupopup id="viewSidebarMenu">
+			<menuitem key="key_openEmptySidebar" observes="viewEmptySidebar"  />
+		</menupopup>
+		
+		<keyset id="mainKeyset">
+			<key id="key_openEmptySidebar" command="viewEmptySidebar"
+				key="&openEmptySidebar.commandkey;" 
+				modifiers="&openEmptySidebar.modifierskey;" />
+		</keyset>
+		
+		<toolbar>
+			<button label="AccesHand" observes="viewEmptySidebar"/>
+		</toolbar>
+		
+		<broadcasterset id="mainBroadcasterSet"> 
+			<broadcaster id="viewEmptySidebar" 
+						label="&emptysidebar.title;"
+						autoCheck="false"
+						type="checkbox"
+						group="sidebar"
+						sidebarurl="chrome://acceshand/content/acceshand.xul"
+						sidebartitle="&emptysidebar.title;"
+						oncommand="toggleSidebar('viewEmptySidebar');" />
+		</broadcasterset>
+		
+	</window>
+</overlay>
