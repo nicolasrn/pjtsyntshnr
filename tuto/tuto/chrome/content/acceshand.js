@@ -768,7 +768,7 @@ Command = {
 		let tmp = Command.recupFavoris();
 		tmp[0] = tmp[0].concat(new Array("supprimer", "ajouter", "retour"));
 		tmp[1] = tmp[1].concat(new Array("Command.deleteFavori()", "Command.addFavori()", "Command.retour()"));
-		clavierFavori = new ClavierVirtuel(tmp[0], tmp[1], 5, 5);
+		clavierFavori = new ClavierVirtuel(tmp[0], tmp[1]);
 	//*/
 	/*
 		Command.recupFavoris();
