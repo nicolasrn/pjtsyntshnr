@@ -19,12 +19,6 @@
 
 using namespace std;
 
-void haut(char *title);
-
-void bas();
-
-//std::vector<std::string> split(const std::string str);
-
 std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems);
 
 std::vector<std::string> split(const std::string &s, char delim);
@@ -40,67 +34,33 @@ int main() {
 	dwEventFlags |= MOUSEEVENTF_LEFTDOWN;
 	dwEventFlags |= MOUSEEVENTF_LEFTUP;
 
-	temp = getenv("QUERY_STRING");
+	temp = getenv("QUERY_STRING"); //pour récupérer le contenu des paramètres GET
 
-	GetCursorPos(&pt);
-	//pt.x = 1190;
-	//pt.y = 5;
+	GetCursorPos(&pt); //récupération position curseur souris
 
-	std::string str = temp;
+	std::string str = temp; 
 	//std::string str = "x=300&y=10";
-	std::vector<std::string> tmp = split(str, '&');
+	std::vector<std::string> tmp = split(str, '&'); //format d'entrée de la chaine x=XXX&y=YYY ou XXX et YYY les coordonnées
 	char* x, *y;
-	x = const_cast<char*>(tmp[0].c_str());
-	y = const_cast<char*>(tmp[1].c_str());
-	x += 2;
-	y += 2;
-	pt.x = atoi(x);
-	pt.y = atoi(y);
-	SetCursorPos(pt.x, pt.y);
+	x = const_cast<char*>(tmp[0].c_str()); //récupération chaine de l'abscisse
+	y = const_cast<char*>(tmp[1].c_str()); //récupération chaine de l'ordonnée
+	x += 2; //déplacement du pointeur pour ignorer "x="
+	y += 2; //déplacement du pointeur pour ignorer "y="
+	pt.x = atoi(x); //conversion en entier
+	pt.y = atoi(y); //conversion en entier
+	SetCursorPos(pt.x, pt.y); //déplacement du curseur
 
-	mouse_event(dwEventFlags, pt.x, pt.y, dwData, 0);
+	mouse_event(dwEventFlags, pt.x, pt.y, dwData, 0); //exécution de la manipulation souris
 
 	printf("Content-Type: text/html;\n\n");
-	printf(
-			"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"fr\" >\n\t<head>");
-	printf("\t\t<title>(%ld, %ld)</title>", pt.x, pt.y);
-	printf(
-			"\t\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n\t</head>\n\t<body>");
-
+	printf("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"fr\" >\n\t<head>");
+	printf("\t\t<title>Retour action balayage</title>");
+	printf("\t\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n\t</head>\n\t<body>");
+	printf("<p>le deplacement + clic effectues en (%ld, %ld)</p>", pt.x, pt.y);
 	printf("\t</body>\n</html>");
-
-
-	/*
-	 printf("Content-Type: text/html;\n\n");
-	 haut(temp);
-	 printf("Hello World !");
-	 bas();
-	 //*/
+	
 	return EXIT_SUCCESS;
 }
-
-void haut(char *title) {
-	printf(
-			"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"fr\" >\n\t<head>");
-	printf("\t\t<title>%s</title>", title);
-	printf(
-			"\t\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n\t</head>\n\t<body>");
-}
-
-void bas() {
-	printf("\t</body>\n</html>");
-}
-
-/*std::vector<std::string> split(const std::string str)
-{
-	std::istringstream iss(str);
-	std::vector<string> tokens;
-	std::copy(istream_iterator<string>(iss),
-	         istream_iterator<std::string>(),
-	         back_inserter<std::vector<std::string> >(tokens));
-
-	return tokens;
-}*/
 
 std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss(s);
