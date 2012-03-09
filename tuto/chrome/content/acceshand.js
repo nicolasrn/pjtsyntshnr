@@ -1218,7 +1218,7 @@ nomClavierPage = new Array("monter", "descendre", "précédent", "suivant", "ret
 actionClavierPage = new Array("Command.up()", "Command.down()", "Command.left()", "Command.right()", "Command.retour()");
 clavierPage = new ClavierVirtuel(nomClavierPage, actionClavierPage);
 
-nomClavierOnglet = new Array("gauche", "droite", "fermer", "ouvrir", "retour");
+nomClavierOnglet = new Array("gauche", "droit", "fermer", "ouvrir", "retour");
 actionClavierOnglet = new Array("Command.ongletLeft()", "Command.ongletRight()", "Command.ongletClose()", "Command.ongletAdd()", "Command.retour()");
 clavierOnglet = new ClavierVirtuel(nomClavierOnglet, actionClavierOnglet);
 
