@@ -38,7 +38,7 @@ int main() {
 
 	GetCursorPos(&pt); //récupération position curseur souris
 
-	std::string str = temp; 
+	std::string str = temp;
 	//std::string str = "x=300&y=10";
 	std::vector<std::string> tmp = split(str, '&'); //format d'entrée de la chaine x=XXX&y=YYY ou XXX et YYY les coordonnées
 	char* x, *y;
@@ -58,7 +58,7 @@ int main() {
 	printf("\t\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n\t</head>\n\t<body>");
 	printf("<p>le deplacement + clic effectues en (%ld, %ld)</p>", pt.x, pt.y);
 	printf("\t</body>\n</html>");
-	
+
 	return EXIT_SUCCESS;
 }
 
